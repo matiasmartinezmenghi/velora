@@ -1,0 +1,92 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,100..125,700..900;1,100..125,700..900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=block">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B2A5B;--blue:#1E5BD6;--sky:#3FA9F5;--mist:#EEF3FA;--yellow:#FFD21F}
+body{width:1080px;height:1920px;overflow:hidden;font-family:"Plus Jakarta Sans",sans-serif;color:var(--navy)}
+#c{position:relative;width:1080px;height:1920px;overflow:hidden;background:linear-gradient(180deg,#fff 0%,var(--mist) 55%,#DDE8F7 100%)}
+.h{font-family:Archivo,sans-serif;font-style:italic;font-weight:900;font-stretch:112%;line-height:.98;letter-spacing:-.01em;text-transform:uppercase}
+#top{position:absolute;left:70px;right:70px;top:120px;display:flex;justify-content:space-between;align-items:center}
+#top img{height:84px}
+.pill{border-radius:99px;font-weight:800;font-size:26px;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;display:inline-flex;align-items:center;gap:10px}
+#heads{position:absolute;left:70px;right:70px;top:250px;height:180px}
+.head{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;font-size:70px;opacity:0}
+#card{position:absolute;left:70px;right:70px;top:460px;height:980px;border-radius:44px;overflow:hidden;box-shadow:0 30px 70px rgba(11,42,91,.25);background:#ccc}
+#photo{position:absolute;inset:0;background:url(photo.jpg) 50% 46%/cover;transform-origin:54% 50%}
+#card .shade{position:absolute;inset:auto 0 0 0;height:180px;background:linear-gradient(transparent,rgba(11,42,91,.45))}
+.tag{position:absolute;top:34px;border-radius:99px;padding:14px 26px;font-weight:800;font-size:30px;letter-spacing:.06em;display:flex;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+#tagL{left:30px;background:var(--blue);color:#fff}
+#tagR{right:30px;background:#fff;color:var(--navy)}
+#tagL svg{width:32px;height:32px}
+#same{position:absolute;left:0;right:0;bottom:34px;text-align:center;color:#fff;font-weight:800;font-size:32px;letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+#vn{position:absolute;left:70px;right:70px;top:1480px;height:150px;background:#fff;border-radius:40px;box-shadow:0 18px 44px rgba(11,42,91,.18);display:flex;align-items:center;gap:26px;padding:0 34px}
+#play{width:88px;height:88px;border-radius:50%;background:var(--blue);display:grid;place-items:center;flex:none}
+#play svg{width:40px;height:40px;fill:#fff}
+#wave{flex:1;height:96px;display:flex;align-items:center;gap:6px}
+#wave i{flex:1;border-radius:6px;background:#C9D6EA;display:block}
+#wave i.on{background:var(--blue)}
+#time{font-weight:700;font-size:28px;color:#5B6878;font-variant-numeric:tabular-nums;width:92px;text-align:right}
+#mic{position:absolute;left:70px;right:70px;top:1656px;display:flex;justify-content:center;align-items:center;gap:12px;font-weight:700;font-size:30px;color:var(--navy)}
+#mic svg{width:34px;height:34px}
+#end{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 20%,#14408A 0%,var(--navy) 65%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;opacity:0;text-align:center}
+#end img{width:620px}
+#end .h{font-size:92px}
+#end .trust{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-weight:800;font-size:30px}
+#end .trust span{background:rgba(255,255,255,.12);border-radius:99px;padding:14px 26px}
+#end .cta{background:var(--yellow);color:var(--navy);font-weight:800;font-size:40px;border-radius:24px;padding:28px 48px}
+</style></head><body><div id="c">
+  <div id="top"><img src="logo0.svg" alt="Velora"><span class="pill" style="background:var(--navy);color:#fff"><svg width="26" height="26" viewBox="0 0 24 24" fill="#FFD21F"><path d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg>Clienta real</span></div>
+  <div id="heads">
+    <div class="head h"><span>Una clienta</span><span>nos mandó esto</span></div>
+    <div class="head h"><span>Misma pared,</span><span style="color:var(--blue)">mitad con Velora</span></div>
+    <div class="head h"><span>Rociás, esperás</span><span style="color:var(--blue)">y pasás un paño</span></div>
+    <div class="head h"><span>Sin fregar.</span><span style="color:var(--blue)">Garantía 30 días</span></div>
+  </div>
+  <div id="card"><div id="photo"></div><div class="shade"></div>
+    <div class="tag" id="tagL"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>CON VELORA</div>
+    <div class="tag" id="tagR">SIN TRATAR</div>
+    <div id="same">Foto real que nos mandó la clienta</div>
+  </div>
+  <div id="vn"><div id="play"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></div><div id="wave"></div><div id="time">0:00</div></div>
+  <div id="mic"><svg viewBox="0 0 24 24" fill="none" stroke="#1E5BD6" stroke-width="2.2" stroke-linecap="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Escuchá el audio real de la clienta</div>
+  <div id="end">
+    <img src="logo1.svg" alt="Velora">
+    <div class="h">Sacá el moho<br><span style="color:var(--yellow)">sin fregar</span></div>
+    <div class="trust"><span>Garantía 30 días</span><span>Envío gratis</span><span>2x1</span></div>
+    <div class="cta">velorargentina.com</div>
+  </div>
+</div>
+<script>
+let E=null;
+const wave=document.getElementById('wave');
+async function init(env){E=env;wave.innerHTML=E.bars.map(b=>`<i style="height:${Math.round(b*100)}%"></i>`).join('');}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const fmt=s=>{s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function render(t){
+  const dur=E.dur, END=dur, TOTAL=dur+3.5;
+  // headlines
+  const cuts=[0,6,30,58,TOTAL];
+  document.querySelectorAll('.head').forEach((h,i)=>{
+    const a=cuts[i],b=cuts[i+1];
+    let o=clamp((t-a)/0.35,0,1)*clamp((b-t)/0.35,0,1); if(i===0&&t<0.35)o=1;
+    h.style.opacity=o; h.style.transform=`translateY(${(1-clamp((t-a)/0.35,0,1))*24}px)`;
+  });
+  // photo: start zoomed on the border, slowly open
+  const z=1.32-0.27*ease(clamp(t/8,0,1)) + 0.04*Math.sin(t/9);
+  document.getElementById('photo').style.transform=`scale(${z})`;
+  // tags pop in
+  [['tagL',1.2],['tagR',1.7]].forEach(([id,at])=>{const p=clamp((t-at)/0.3,0,1);const el=document.getElementById(id);el.style.opacity=p;el.style.transform=`scale(${0.7+0.3*p})`;});
+  // voice note
+  const f=Math.min(Math.floor(t*E.fps),E.env.length-1), amp=t<END?E.env[f]:0;
+  const prog=clamp(t/dur,0,1), on=Math.round(prog*E.bars.length);
+  wave.querySelectorAll('i').forEach((el,i)=>{el.className=i<on?'on':'';const near=Math.abs(i-on)<=1&&t<END;el.style.transform=near?`scaleY(${1+amp*0.6})`:'none';});
+  document.getElementById('time').textContent=fmt(Math.min(t,dur));
+  document.getElementById('play').style.transform=`scale(${1+amp*0.12})`;
+  document.getElementById('mic').style.opacity=0.65+0.35*Math.abs(Math.sin(t*2));
+  // end card
+  const eo=clamp((t-END+0.2)/0.5,0,1);
+  const end=document.getElementById('end'); end.style.opacity=eo; end.style.transform=`scale(${1.04-0.04*eo})`;
+}
+window.init=init; window.render=render;
+</script></body></html>
