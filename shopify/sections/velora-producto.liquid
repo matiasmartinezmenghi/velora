@@ -87,7 +87,6 @@
   data-vpc-reloj-pre-pie="{{ s.cyber_reloj_pre_pie | escape }}"
   data-vpc-reloj-vivo="{{ s.cyber_reloj_vivo | escape }}"
   data-vpc-ahorro-txt="{{ s.cyber_ahorro_texto | escape }}"
-  data-vpc-vivo-txt="{{ s.cyber_vivo_texto | escape }}"
   {%- endif %}
   data-error-generico="{{ s.texto_error | escape }}"
 >
@@ -153,10 +152,6 @@
       </div>
 
       <div class="velora-producto__info">
-
-        {%- if s.cyber_activo and s.cyber_mostrar_vivo -%}
-          <p class="vpc-vivo" data-vpc-vivo hidden><span class="vpc-vivo__punto" aria-hidden="true"></span><span data-vpc-vivo-t></span></p>
-        {%- endif -%}
 
         {%- if s.mostrar_prueba_social and s.texto_prueba_social != blank -%}
           <div class="velora-producto__prueba velora-producto__aparecer" style="--d:0;">
@@ -2379,22 +2374,18 @@
 .vpc-logo { flex: none !important; display: block !important; width: 92px !important; height: auto !important; filter: drop-shadow(0 6px 12px rgba(60, 20, 160, 0.28)) !important; }
 .vpc-insignia-logo { position: absolute !important; left: 8px !important; bottom: 8px !important; z-index: 3 !important; width: 104px !important; height: auto !important; filter: drop-shadow(0 6px 14px rgba(42, 31, 184, 0.35)) !important; pointer-events: none !important; }
 .vpc-insignia-logo[hidden] { display: none !important; }
-.vpc-vivo { display: inline-flex !important; align-self: flex-start !important; align-items: center !important; gap: 8px !important; margin: 0 0 10px !important; padding: 6px 14px 6px 11px !important; border-radius: 999px !important; background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; color: #FFFFFF !important; font: 700 11.5px/1 'Poppins', sans-serif !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; box-shadow: 0 6px 16px color-mix(in srgb, var(--vpc-2) 35%, transparent) !important; }
-.vpc-vivo[hidden], .vpc-dias[hidden], .vpc-dia[hidden] { display: none !important; }
-.vpc-vivo__punto { position: relative !important; flex: none !important; width: 8px !important; height: 8px !important; border-radius: 999px !important; background: #2EE68A !important; }
-.vpc-vivo__punto::after { content: "" !important; position: absolute !important; inset: -4px !important; border-radius: 999px !important; background: #2EE68A !important; animation: vpcVivo 1.6s ease-out infinite !important; }
-@keyframes vpcVivo { 0% { opacity: 0.55; transform: scale(0.5); } 80%, 100% { opacity: 0; transform: scale(1.7); } }
+.vpc-dias[hidden], .vpc-dia[hidden] { display: none !important; }
 .vpc-dias { list-style: none !important; display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; margin: 14px 0 0 !important; padding: 0 !important; }
-.vpc-dia { position: relative !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 4px !important; padding: 9px 4px 8px !important; border-radius: 12px !important; border: 1.5px solid color-mix(in srgb, var(--vpc-1) 22%, var(--vp-linea)) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--vpc-2) 6%, #FFFFFF), color-mix(in srgb, var(--vpc-1) 5%, #FFFFFF)) !important; text-align: center !important; transition: transform 0.3s ease, background-color 0.3s ease !important; }
-.vpc-dia small { font: 700 10px/1 'Poppins', sans-serif !important; letter-spacing: 0.06em !important; color: var(--vp-piedra) !important; white-space: nowrap !important; }
-.vpc-dia b { position: relative !important; font: italic 800 21px/1 'Poppins', sans-serif !important; letter-spacing: -0.01em !important; color: var(--vpc-1) !important; }
-.vpc-dia--hoy { border-color: #F2C200 !important; background: #FFE81A !important; transform: translateY(-2px) !important; box-shadow: 0 8px 18px rgba(242, 194, 0, 0.35) !important; }
-.vpc-dia--hoy small, .vpc-dia--hoy b { color: var(--vp-tinta) !important; }
-.vpc-dia--pasado { background: var(--vp-niebla) !important; border-color: var(--vp-linea) !important; }
-.vpc-dia--pasado small, .vpc-dia--pasado b { color: color-mix(in srgb, var(--vp-piedra) 70%, #FFFFFF) !important; }
-.vpc-dia--pasado b::after { content: "" !important; position: absolute !important; left: -5px !important; right: -5px !important; top: 50% !important; height: 2.5px !important; border-radius: 2px !important; background: #E53935 !important; transform: rotate(-12deg) !important; }
-@media screen and (max-width: 380px) { .vpc-dias { gap: 6px !important; } .vpc-dia b { font-size: 18px !important; } .vpc-dia small { font-size: 9px !important; } }
-@media (prefers-reduced-motion: reduce) { .vpc-vivo__punto::after { animation: none !important; } }
+.vpc-dia { position: relative !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 5px !important; padding: 10px 4px 9px !important; border-radius: 12px !important; border: 1px solid var(--vp-linea) !important; background: #FFFFFF !important; text-align: center !important; }
+.vpc-dia small { font: 600 10px/1 'Poppins', sans-serif !important; letter-spacing: 0.06em !important; color: var(--vp-piedra) !important; white-space: nowrap !important; }
+.vpc-dia b { position: relative !important; font: 700 19px/1 'Poppins', sans-serif !important; letter-spacing: -0.01em !important; color: var(--vpc-1) !important; }
+.vpc-dia--hoy { border-color: transparent !important; background: linear-gradient(135deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; box-shadow: 0 6px 16px color-mix(in srgb, var(--vpc-2) 30%, transparent) !important; }
+.vpc-dia--hoy small { color: rgba(255, 255, 255, 0.85) !important; }
+.vpc-dia--hoy b { color: #FFFFFF !important; }
+.vpc-dia--pasado { background: var(--vp-niebla) !important; border-color: transparent !important; }
+.vpc-dia--pasado small, .vpc-dia--pasado b { color: color-mix(in srgb, var(--vp-piedra) 60%, #FFFFFF) !important; }
+.vpc-dia--pasado b::after { content: "" !important; position: absolute !important; left: -3px !important; right: -3px !important; top: 52% !important; height: 2px !important; border-radius: 2px !important; background: #E53935 !important; }
+@media screen and (max-width: 380px) { .vpc-dias { gap: 6px !important; } .vpc-dia b { font-size: 17px !important; } .vpc-dia small { font-size: 9px !important; } }
 .velora-producto--vpc .velora-producto__pack-insignia { background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2)) !important; color: #FFFFFF !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--vpc-2) 35%, transparent) !important; }
 .velora-producto--vpc .velora-producto__pack--activo .velora-producto__pack-insignia { background: linear-gradient(90deg, var(--vpc-1), var(--vpc-3)) !important; }
 .velora-producto--vpc .velora-producto__check-icono { background: linear-gradient(135deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--vpc-2) 32%, transparent) !important; }
@@ -2811,11 +2802,7 @@ if (!customElements.get('velora-producto-resenas')) {
       var reloj = q('[data-vpc-reloj]'), rt = q('[data-vpc-reloj-t]'), pie = q('[data-vpc-reloj-pie]');
       var ins = q('[data-vpc-insignia]');
       if (ins) ins.hidden = e.fase === 'fin';
-      var vivo = q('[data-vpc-vivo]'), vivoT = q('[data-vpc-vivo-t]'), dias = q('[data-vpc-dias]');
-      if (vivo) {
-        vivo.hidden = e.fase !== 'vivo';
-        if (vivoT && e.fase === 'vivo') vivoT.textContent = String(d.vpcVivoTxt || '').split('[d]').join(e.dia + 1).split('[t]').join(pct.length);
-      }
+      var dias = q('[data-vpc-dias]');
       if (dias) {
         dias.hidden = e.fase !== 'vivo';
         if (e.fase === 'vivo') qa('[data-vpc-dia]').forEach(function (c) {
@@ -3001,8 +2988,6 @@ if (!customElements.get('velora-producto-resenas')) {
     { "type": "text", "id": "cyber_e3", "label": "Etiqueta día 3", "default": "MIÉ 4/11" },
     { "type": "range", "id": "cyber_p4", "label": "Descuento día 4", "min": 0, "max": 50, "step": 1, "unit": "%", "default": 10 },
     { "type": "text", "id": "cyber_e4", "label": "Etiqueta día 4", "default": "JUE 5/11" },
-    { "type": "checkbox", "id": "cyber_mostrar_vivo", "label": "Píldora \"En vivo\" arriba de todo", "default": true },
-    { "type": "text", "id": "cyber_vivo_texto", "label": "Texto de la píldora", "info": "[d] = día de hoy, [t] = total de días.", "default": "En vivo · Día [d] de [t]" },
     { "type": "checkbox", "id": "cyber_mostrar_dias", "label": "Los 4 días con su % (los pasados se tachan)", "default": true },
     { "type": "checkbox", "id": "pre_activo", "label": "Activar Pre-Cyber (antes del día 1)", "default": true },
     { "type": "range", "id": "pre_porcentaje", "label": "Descuento Pre-Cyber", "min": 0, "max": 20, "step": 1, "unit": "%", "default": 5, "info": "Tiene que coincidir con el descuento automático de Shopify." },
