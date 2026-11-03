@@ -1,0 +1,3415 @@
+{%- liquid
+  assign s = section.settings
+  assign producto = product
+  if s.producto != blank
+    assign producto = s.producto
+  endif
+  assign primer_pack = 0
+  assign elegido = 0
+  for block in section.blocks
+    if block.type == 'pack'
+      if primer_pack == 0
+        assign primer_pack = forloop.index
+      endif
+      if block.settings.por_defecto and elegido == 0
+        assign elegido = forloop.index
+      endif
+    endif
+  endfor
+  if elegido == 0
+    assign elegido = primer_pack
+  endif
+  assign hay_arriba = false
+  assign hay_abajo = false
+  assign hay_confianza = false
+  assign hay_datos = false
+  assign cantidad_resenas = 0
+  assign contador_checks = 0
+  assign contador_packs = 0
+  if s.cyber_logo != blank
+    assign vpc_logo = s.cyber_logo | image_url: width: 400
+  else
+    assign vpc_logo = s.cyber_logo_url
+  endif
+  for block in section.blocks
+    if block.type == 'acordeon' and block.settings.ubicacion == 'arriba'
+      assign hay_arriba = true
+    endif
+    if block.type == 'acordeon' and block.settings.ubicacion == 'abajo'
+      assign hay_abajo = true
+    endif
+    if block.type == 'confianza'
+      assign hay_confianza = true
+    endif
+    if block.type == 'dato_rapido'
+      assign hay_datos = true
+    endif
+    if block.type == 'resena'
+      assign cantidad_resenas = cantidad_resenas | plus: 1
+    endif
+  endfor
+  assign total_medios = producto.media.size
+  if s.video != blank
+    assign total_medios = total_medios | plus: 1
+  endif
+  assign rating_valor = s.rating_numero
+  assign rating_cantidad = s.rating_cantidad
+  if s.fuente_rating == 'app' and producto.metafields.reviews.rating.value != blank
+    assign rating_valor = producto.metafields.reviews.rating.value.rating | round: 1 | append: '/5'
+    assign rating_cantidad = producto.metafields.reviews.rating_count.value
+  endif
+-%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap">
+
+<velora-producto
+  class="{% if s.cyber_activo %}velora-producto--cyber velora-producto--vpc {% endif %}velora-producto velora-producto--titulos-{{ s.tipografia_titulos }}{% if s.checks_con_lineas %} velora-producto--checks-lineas{% endif %}{% if s.animaciones %} velora-producto--animado{% endif %}{% if s.ocultar_mobile %} velora-producto--oculto-mobile{% endif %}{% if s.ocultar_desktop %} velora-producto--oculto-desktop{% endif %}"
+  style="--vpc-1:{{ s.cyber_color_1 }};--vpc-2:{{ s.cyber_color_2 }};--vpc-3:{{ s.cyber_color_3 }};--vp-fondo:{{ s.color_fondo }};--vp-tinta:{{ s.color_tinta }};--vp-azul:{{ s.color_azul }};--vp-celeste:{{ s.color_celeste }};--vp-niebla:{{ s.color_niebla }};--vp-piedra:{{ s.color_piedra }};--vp-linea:{{ s.color_linea }};--vp-estrellas:{{ s.color_estrellas }};--vp-boton-fondo:{{ s.color_boton_fondo }};--vp-boton-texto:{{ s.color_boton_texto }};--vp-boton-radio:{{ s.radio_boton }}px;--vp-pack-fondo:{{ s.color_pack_fondo }};--vp-pack-activo-fondo:{{ s.color_pack_activo_fondo }};--vp-pack-activo-borde:{{ s.color_pack_activo_borde }};--vp-pack-radio:{{ s.radio_pack }}px;--vp-chip-fondo:{{ s.color_chip_fondo }};--vp-chip-texto:{{ s.color_chip_texto }};--vp-unidad:{{ s.color_precio_unidad }};--vp-regalo-on:{{ s.color_regalo_activo }};--vp-regalo-off:{{ s.color_regalo_inactivo }};--vp-insignia-fondo:{{ s.color_insignia_fondo }};--vp-insignia-texto:{{ s.color_insignia_texto }};--vp-tachado:{{ s.color_tachado }};--vp-cuotas:{{ s.color_cuotas }};--vp-img:{{ s.tamano_imagen_pack }}px;--vp-titulo-m:{{ s.tamano_titulo_mobile }}px;--vp-titulo-d:{{ s.tamano_titulo_desktop }}px;--vp-max:{{ s.ancho_maximo }}px;--vp-pt-m:{{ s.padding_superior_mobile }}px;--vp-pb-m:{{ s.padding_inferior_mobile }}px;--vp-pt-d:{{ s.padding_superior_desktop }}px;--vp-pb-d:{{ s.padding_inferior_desktop }}px;--vp-relacion:{{ s.relacion_imagen }};--vp-ajuste:{{ s.ajuste_imagen }};"
+  data-modo="{{ s.modo_boton }}"
+  data-boton="{{ s.texto_boton | escape }}"
+  data-agotado="{{ s.texto_agotado | escape }}"
+  {%- if s.cyber_activo %}
+  {%- capture vpc_clave -%}{"i":{{ s.cyber_fecha_inicio | strip | json }},"p":[{{ s.cyber_p1 }},{{ s.cyber_p2 }},{{ s.cyber_p3 }},{{ s.cyber_p4 }}],"e":[{{ s.cyber_e1 | json }},{{ s.cyber_e2 | json }},{{ s.cyber_e3 | json }},{{ s.cyber_e4 | json }}]}{%- endcapture %}
+  data-cyber-k="{{ vpc_clave | base64_encode }}"
+  data-cyber-pre="{{ s.pre_activo }}"
+  data-cyber-pre-pct="{{ s.pre_porcentaje }}"
+  data-cyber-sin-decimales="{{ s.sin_decimales }}"
+  data-cyber-txt-unidad="{{ s.texto_precio_unidad | escape }}"
+  data-vpc-benef-pre="{{ s.cyber_benef_pre | escape }}"
+  data-vpc-benef-pre-bajada="{{ s.cyber_benef_pre_bajada | escape }}"
+  data-vpc-benef-vivo="{{ s.cyber_benef_vivo | escape }}"
+  data-vpc-benef-manana="{{ s.cyber_benef_manana | escape }}"
+  data-vpc-benef-ultimo="{{ s.cyber_benef_ultimo | escape }}"
+  data-vpc-pill-pre="{{ s.cyber_pill_pre | escape }}"
+  data-vpc-pill-vivo="{{ s.cyber_pill_vivo | escape }}"
+  data-vpc-reloj-pre="{{ s.cyber_reloj_pre | escape }}"
+  data-vpc-reloj-pre-pie="{{ s.cyber_reloj_pre_pie | escape }}"
+  data-vpc-reloj-vivo="{{ s.cyber_reloj_vivo | escape }}"
+  data-vpc-ahorro-txt="{{ s.cyber_ahorro_texto | escape }}"
+  data-vpc-vivo-txt="{{ s.cyber_vivo_texto | escape }}"
+  {%- endif %}
+  data-error-generico="{{ s.texto_error | escape }}"
+>
+  <div class="velora-producto__contenedor">
+    <div class="velora-producto__grilla">
+
+      <div class="velora-producto__galeria">
+        <div class="velora-producto__pista" data-pista>
+          {%- assign vpc_ins_hecha = false -%}
+          {%- if s.video != blank -%}
+            {%- assign vpc_ins_hecha = true -%}
+            <div class="velora-producto__slide">
+              {%- if s.cyber_activo and s.cyber_insignia -%}{%- if s.cyber_insignia_estilo == 'logo' and vpc_logo != blank -%}<img class="vpc-insignia-logo" data-vpc-insignia src="{{ vpc_logo }}" alt="" width="400" height="209" aria-hidden="true">{%- else -%}<span class="vpc-insignia" data-vpc-insignia aria-hidden="true"><span class="vpc-insignia__v">VELORA</span><span class="vpc-insignia__c">CYBER</span><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor"/></svg></span>{%- endif -%}{%- endif -%}
+              {{ s.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, image_size: '1200x', class: 'velora-producto__medio' }}
+            </div>
+          {%- endif -%}
+          {%- for media in producto.media -%}
+            <div class="velora-producto__slide">
+              {%- if forloop.first and vpc_ins_hecha == false -%}{%- if s.cyber_activo and s.cyber_insignia -%}{%- if s.cyber_insignia_estilo == 'logo' and vpc_logo != blank -%}<img class="vpc-insignia-logo" data-vpc-insignia src="{{ vpc_logo }}" alt="" width="400" height="209" aria-hidden="true">{%- else -%}<span class="vpc-insignia" data-vpc-insignia aria-hidden="true"><span class="vpc-insignia__v">VELORA</span><span class="vpc-insignia__c">CYBER</span><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor"/></svg></span>{%- endif -%}{%- endif -%}{%- endif -%}
+              {%- case media.media_type -%}
+                {%- when 'image' -%}
+                  {{ media | image_url: width: 1400 | image_tag: class: 'velora-producto__medio', loading: forloop.first | ternary: 'eager', 'lazy', sizes: '(min-width: 990px) 55vw, 100vw', widths: '600, 900, 1200, 1400', alt: media.alt | default: producto.title }}
+                {%- when 'video' -%}
+                  {{ media | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, image_size: '1200x', class: 'velora-producto__medio' }}
+                {%- when 'external_video' -%}
+                  {{ media | external_video_tag: class: 'velora-producto__medio' }}
+                {%- else -%}
+                  {{ media.preview_image | image_url: width: 1400 | image_tag: class: 'velora-producto__medio', loading: 'lazy' }}
+              {%- endcase -%}
+            </div>
+          {%- else -%}
+            {%- if s.video == blank -%}
+              <div class="velora-producto__slide">{{ 'product-1' | placeholder_svg_tag: 'velora-producto__medio velora-producto__medio--placeholder' }}</div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if total_medios > 1 -%}
+          <div class="velora-producto__puntos" aria-hidden="true">
+            {%- for i in (1..total_medios) -%}
+              <button type="button" class="velora-producto__punto{% if forloop.first %} velora-producto__punto--activo{% endif %}" data-punto tabindex="-1"></button>
+            {%- endfor -%}
+          </div>
+          {%- if s.mostrar_miniaturas -%}
+            <div class="velora-producto__miniaturas">
+              {%- if s.video != blank -%}
+                <button type="button" class="velora-producto__miniatura velora-producto__miniatura--activa" data-miniatura aria-label="Ver video">
+                  {%- if s.video.preview_image -%}{{ s.video.preview_image | image_url: width: 200 | image_tag: loading: 'lazy' }}{%- endif -%}
+                  <span class="velora-producto__miniatura-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
+                </button>
+              {%- endif -%}
+              {%- for media in producto.media -%}
+                <button type="button" class="velora-producto__miniatura{% if forloop.first and s.video == blank %} velora-producto__miniatura--activa{% endif %}" data-miniatura aria-label="Ver imagen {{ forloop.index }}">
+                  {{ media.preview_image | image_url: width: 200 | image_tag: loading: 'lazy' }}
+                  {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+                    <span class="velora-producto__miniatura-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
+                  {%- endif -%}
+                </button>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+
+      <div class="velora-producto__info">
+
+        {%- if s.cyber_activo and s.cyber_mostrar_vivo -%}
+          <p class="vpc-vivo" data-vpc-vivo hidden><span class="vpc-vivo__punto" aria-hidden="true"></span><span data-vpc-vivo-t></span></p>
+        {%- endif -%}
+
+        {%- if s.mostrar_prueba_social and s.texto_prueba_social != blank -%}
+          <div class="velora-producto__prueba velora-producto__aparecer" style="--d:0;">
+            {%- if s.avatar_1 != blank or s.avatar_2 != blank or s.avatar_3 != blank -%}
+              <span class="velora-producto__avatares" aria-hidden="true">
+                {%- if s.avatar_1 != blank -%}{{ s.avatar_1 | image_url: width: 80 | image_tag: class: 'velora-producto__avatar', loading: 'lazy', alt: '' }}{%- endif -%}
+                {%- if s.avatar_2 != blank -%}{{ s.avatar_2 | image_url: width: 80 | image_tag: class: 'velora-producto__avatar', loading: 'lazy', alt: '' }}{%- endif -%}
+                {%- if s.avatar_3 != blank -%}{{ s.avatar_3 | image_url: width: 80 | image_tag: class: 'velora-producto__avatar', loading: 'lazy', alt: '' }}{%- endif -%}
+              </span>
+            {%- endif -%}
+            {%- if s.mostrar_verificado -%}
+              <span class="velora-producto__verificado" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="currentColor"/><path d="M8.5 12.2l2.3 2.3 4.7-4.7" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            {%- endif -%}
+            <span class="velora-producto__prueba-texto">{{ s.texto_prueba_social | escape }}</span>
+          </div>
+        {%- endif -%}
+
+        {%- if s.mostrar_rating and rating_valor != blank -%}
+          <a href="{{ s.link_resenas | default: '#resenas' }}" class="velora-producto__rating velora-producto__aparecer" style="--d:1;">
+            <span class="velora-producto__estrellas" aria-hidden="true">
+              {%- for i in (1..5) -%}<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="currentColor"/></svg>{%- endfor -%}
+            </span>
+            <strong>{{ rating_valor }}</strong>
+            {%- if rating_cantidad != blank and s.texto_resenas != blank -%}
+              <span class="velora-producto__rating-texto">{{ s.texto_resenas | replace: '[n]', rating_cantidad | escape }}</span>
+            {%- endif -%}
+          </a>
+        {%- endif -%}
+
+        {%- if s.etiqueta_principal != blank or s.etiqueta_secundaria != blank -%}
+          <div class="velora-producto__etiquetas velora-producto__aparecer" style="--d:1;">
+            {%- if s.etiqueta_principal != blank -%}<span class="velora-producto__etiqueta">{{ s.etiqueta_principal | escape }}</span>{%- endif -%}
+            {%- if s.etiqueta_secundaria != blank -%}<span class="velora-producto__etiqueta-secundaria">{{ s.etiqueta_secundaria | escape }}</span>{%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <h1 class="velora-producto__titulo velora-producto__aparecer" style="--d:2;">{{ s.titulo | default: producto.title | escape }}</h1>
+        {%- if s.subtitulo != blank -%}
+          <p class="velora-producto__subtitulo velora-producto__aparecer" style="--d:3;">{{ s.subtitulo | escape }}</p>
+        {%- endif -%}
+
+        {%- if s.cyber_activo and s.cyber_mostrar_dias -%}
+          <ol class="vpc-dias" data-vpc-dias aria-label="Descuentos de cada día del Cyber" hidden>
+            {%- for i in (0..3) -%}
+              <li class="vpc-dia" data-vpc-dia="{{ i }}"><small data-vpc-dia-e></small><b data-vpc-dia-p></b></li>
+            {%- endfor -%}
+          </ol>
+        {%- endif -%}
+
+        <ul class="velora-producto__checks">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'check' and block.settings.texto != blank -%}
+              {%- liquid
+                assign contador_checks = contador_checks | plus: 1
+                assign icono_check = block.settings.icono | default: 'auto'
+                if icono_check == 'auto'
+                  assign txt = block.settings.texto | downcase
+                  if txt contains 'mancha' or txt contains 'moho'
+                    assign icono_check = 'mancha'
+                  elsif txt contains 'fregar' or txt contains 'frotar' or txt contains 'esper'
+                    assign icono_check = 'reloj'
+                  elsif txt contains 'junta' or txt contains 'azulejo' or txt contains 'pared' or txt contains 'techo'
+                    assign icono_check = 'azulejo'
+                  elsif txt contains 'chorre' or txt contains 'gel'
+                    assign icono_check = 'gota'
+                  elsif txt contains 'limpi' or txt contains 'brill' or txt contains 'blanco' or txt contains 'aspecto'
+                    assign icono_check = 'brillo'
+                  else
+                    assign icono_check = 'check'
+                  endif
+                endif
+              -%}
+              <li class="velora-producto__check velora-producto__aparecer" style="--d:{{ contador_checks | plus: 3 }};" {{ block.shopify_attributes }}>
+                <span class="velora-producto__check-icono velora-producto__check-icono--{{ icono_check }}" aria-hidden="true">
+                  {%- case icono_check -%}
+                    {%- when 'mancha' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle class="velora-producto__bi-mancha" style="--m:0;" cx="8.5" cy="9.5" r="3" fill="currentColor" stroke="none"/><circle class="velora-producto__bi-mancha" style="--m:1;" cx="15.5" cy="8.5" r="2" fill="currentColor" stroke="none"/><circle class="velora-producto__bi-mancha" style="--m:2;" cx="13" cy="15.5" r="2.5" fill="currentColor" stroke="none"/><path class="velora-producto__bi-chispa" opacity="0" d="M12 5.5l1.4 3.9 3.9 1.4-3.9 1.4L12 16.1l-1.4-3.9-3.9-1.4 3.9-1.4z" fill="currentColor" stroke="none"/></svg>
+                    {%- when 'reloj' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M10 3h4"/><path class="velora-producto__bi-aguja" d="M12 13V8.5"/><circle cx="12" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+                    {%- when 'azulejo' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M12 4v16M4 12h16"/><rect class="velora-producto__bi-baldosa" x="13.5" y="5.5" width="5" height="5" rx="1" fill="currentColor" stroke="none" opacity="0"/></svg>
+                    {%- when 'gota' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="velora-producto__bi-gota"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10z"/><path d="M9.6 14.2a2.4 2.4 0 0 0 2.4 2.4"/></g></svg>
+                    {%- when 'brillo' -%}
+                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path class="velora-producto__bi-estrella" d="M10.5 4l1.6 4.9 4.9 1.6-4.9 1.6-1.6 4.9-1.6-4.9L4 10.5l4.9-1.6z"/><path class="velora-producto__bi-estrella velora-producto__bi-estrella--chica" d="M17.5 13.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+                    {%- when 'spray' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10h6v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="M10 10V7h4v3"/><path d="M10 7V5h5l1 2"/><circle class="velora-producto__bi-niebla" style="--m:0;" cx="19" cy="5" r="0.9" fill="currentColor" stroke="none"/><circle class="velora-producto__bi-niebla" style="--m:1;" cx="20.5" cy="7.5" r="0.9" fill="currentColor" stroke="none"/><circle class="velora-producto__bi-niebla" style="--m:2;" cx="19" cy="10" r="0.9" fill="currentColor" stroke="none"/></svg>
+                    {%- when 'escudo' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path class="velora-producto__bi-trazo" pathLength="1" d="M9 12l2 2 4-4"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path class="velora-producto__bi-trazo" pathLength="1" d="M6 12.5l4 4L18 8"/></svg>
+                  {%- endcase -%}
+                </span>
+                <span>{{ block.settings.texto | escape }}</span>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+        {%- if hay_arriba -%}
+          <div class="velora-producto__acordeones">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'acordeon' and block.settings.ubicacion == 'arriba' -%}
+                <details class="velora-producto__acordeon"{% if block.settings.abierto %} open{% endif %} {{ block.shopify_attributes }}>
+                  <summary class="velora-producto__acordeon-titulo">
+                    <span>{{ block.settings.titulo | escape }}</span>
+                    <span class="velora-producto__acordeon-mas" aria-hidden="true"></span>
+                  </summary>
+                  <div class="velora-producto__acordeon-contenido">{{ block.settings.contenido }}</div>
+                </details>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if primer_pack > 0 -%}
+          {%- if s.texto_separador != blank -%}
+            <div class="velora-producto__separador"><span>{{ s.texto_separador | escape }}</span></div>
+          {%- endif -%}
+          {%- if s.nota_packs != blank -%}
+            <p class="velora-producto__nota">{{ s.nota_packs }}</p>
+          {%- endif -%}
+
+          {%- if request.design_mode -%}
+            <div class="velora-producto__diagnostico">
+              <strong>Solo lo ves vos en el editor · Producto que lee la sección: {{ producto.title | escape }}</strong>
+              <ol>
+                {%- for v in producto.variants -%}
+                  <li>{{ v.title | escape }} · {{ v.price | money }}{% unless v.available %} · sin stock{% endunless %}</li>
+                {%- endfor -%}
+              </ol>
+            </div>
+          {%- endif -%}
+          {%- if false -%}
+            <div class="velora-producto__cuotas-banda" data-vp-cuotas>
+              <span class="velora-producto__cuotas-icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg></span>
+              <span class="velora-producto__cuotas-textos">
+                {%- if s.cuotas_titulo != blank -%}<strong>{{ s.cuotas_titulo | escape }}</strong>{%- endif -%}
+                {%- if s.cuotas_bajada != blank -%}<span>{{ s.cuotas_bajada | escape }}</span>{%- endif -%}
+              </span>
+              {%- if s.cuotas_etiqueta != blank or s.cuotas_reloj -%}
+                <span class="velora-producto__cuotas-fin">
+                  {%- if s.cuotas_etiqueta != blank -%}<em>{{ s.cuotas_etiqueta | escape }}</em>{%- endif -%}
+                  {%- if s.cuotas_reloj -%}<i data-vp-cuotas-reloj></i>{%- endif -%}
+                </span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+          {%- if s.cyber_activo -%}
+            <div class="vpc-benef" data-vpc-benef{% unless s.pre_activo %} hidden{% endunless %}>
+              {%- if vpc_logo != blank -%}<img class="vpc-logo" src="{{ vpc_logo }}" alt="Velora Cyber" width="400" height="209" loading="lazy">{%- else -%}<span class="vpc-mini" aria-hidden="true"><span class="vpc-mini__brillo"></span><span class="vpc-mini__v">VELORA</span><span class="vpc-mini__c">CYBER<svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor"/></svg></span><span class="vpc-mini__l">OFF</span></span>{%- endif -%}
+              <span class="vpc-benef__txt"><small>{{ s.cyber_benef_titulo | escape }}</small><strong data-vpc-benef-t>{{ s.cyber_benef_pre | replace: '[pre]', s.pre_porcentaje | escape }}</strong><em data-vpc-benef-b>{{ s.cyber_benef_pre_bajada | escape }}</em></span>
+            </div>
+          {%- endif -%}
+          <div class="velora-producto__packs" role="radiogroup" aria-label="{{ s.texto_separador | escape }}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'pack' -%}
+                {%- liquid
+                  assign b = block.settings
+                  assign contador_packs = contador_packs | plus: 1
+                  assign variante = nil
+                  assign vinculo = ''
+                  if b.producto_oferta != blank
+                    assign variante = b.producto_oferta.selected_or_first_available_variant
+                    assign vinculo = 'producto'
+                  endif
+                  assign buscada = b.nombre_variante | strip | downcase | replace: 'Á', 'a' | replace: 'É', 'e' | replace: 'Í', 'i' | replace: 'Ó', 'o' | replace: 'Ú', 'u' | replace: 'Ñ', 'n' | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: 'ñ', 'n' | replace: ' ', ''
+                  if variante == blank and buscada != blank
+                    assign segmento = '|' | append: buscada | append: '|'
+                    for v in producto.variants
+                      assign candidato = '|' | append: v.title | append: '|' | append: v.option1 | append: '|' | append: v.option2 | append: '|' | append: v.option3 | append: '|' | append: v.sku | append: '|'
+                      assign candidato = candidato | downcase | replace: 'Á', 'a' | replace: 'É', 'e' | replace: 'Í', 'i' | replace: 'Ó', 'o' | replace: 'Ú', 'u' | replace: 'Ñ', 'n' | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: 'ñ', 'n' | replace: ' ', ''
+                      if candidato contains segmento
+                        assign variante = v
+                        assign vinculo = 'nombre'
+                        break
+                      endif
+                    endfor
+                    if variante == blank
+                      for v in producto.variants
+                        assign candidato = v.title | downcase | replace: 'Á', 'a' | replace: 'É', 'e' | replace: 'Í', 'i' | replace: 'Ó', 'o' | replace: 'Ú', 'u' | replace: 'Ñ', 'n' | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: 'ñ', 'n' | replace: ' ', ''
+                        if candidato contains buscada or buscada contains candidato
+                          assign variante = v
+                          assign vinculo = 'nombre'
+                          break
+                        endif
+                      endfor
+                    endif
+                  endif
+                  if variante == blank and buscada == blank
+                    assign posicion = b.variante
+                    if posicion == 0
+                      assign posicion = contador_packs
+                    endif
+                    assign v_idx = posicion | minus: 1
+                    assign variante = producto.variants[v_idx]
+                    if variante != blank
+                      assign vinculo = 'posicion'
+                    endif
+                  endif
+                  if variante == blank
+                    assign variante = producto.selected_or_first_available_variant
+                  endif
+                  assign total = variante.price | times: b.cantidad
+                  assign comparado = variante.compare_at_price | times: b.cantidad
+                  if b.precio_tachado != blank and b.precio_tachado > 0
+                    assign comparado = b.precio_tachado | times: 100 | round
+                  endif
+                  assign por_unidad = total | divided_by: b.unidades
+                  if b.precio_unidad != blank and b.precio_unidad > 0
+                    assign por_unidad = b.precio_unidad | times: 100 | round
+                  endif
+                  assign ahorro = 0
+                  if comparado > total
+                    assign ahorro = comparado | minus: total
+                  endif
+                  if b.ahorro_manual != blank and b.ahorro_manual > 0
+                    assign ahorro = b.ahorro_manual | times: 100 | round
+                  endif
+                  if s.sin_decimales
+                    assign precio_txt = total | money_without_trailing_zeros
+                    assign comparado_txt = comparado | money_without_trailing_zeros
+                    assign unidad_txt = por_unidad | money_without_trailing_zeros
+                    assign ahorro_txt = ahorro | money_without_trailing_zeros
+                  else
+                    assign precio_txt = total | money
+                    assign comparado_txt = comparado | money
+                    assign unidad_txt = por_unidad | money
+                    assign ahorro_txt = ahorro | money
+                  endif
+                  if ahorro <= 0
+                    assign ahorro_txt = ''
+                  endif
+                  assign regalo_id = ''
+                  if b.regalo_producto != blank
+                    assign regalo_variante = b.regalo_producto.selected_or_first_available_variant
+                    if regalo_variante != blank and regalo_variante.available
+                      assign regalo_id = regalo_variante.id
+                    endif
+                  endif
+                  assign cuotas_n = b.cuotas | default: 0
+                  assign cuota_txt = ''
+                  if false and cuotas_n > 1
+                    assign cuota_monto = total | divided_by: cuotas_n
+                    if s.sin_decimales
+                      assign cuota_txt = cuota_monto | money_without_trailing_zeros
+                    else
+                      assign cuota_txt = cuota_monto | money
+                    endif
+                  endif
+                  assign es_elegido = false
+                  if forloop.index == elegido
+                    assign es_elegido = true
+                    assign sel_id = variante.id
+                    assign sel_cant = b.cantidad
+                    assign sel_precio = precio_txt
+                    assign sel_disponible = variante.available
+                    assign sel_ahorro = ahorro_txt
+                    assign sel_cuotas = cuotas_n
+                    assign sel_cuota_txt = cuota_txt
+                  endif
+                  assign repeticiones = 1
+                  if b.repetir_imagen
+                    assign repeticiones = b.unidades
+                  endif
+                  assign lineas_incluye = b.incluye | newline_to_br | split: '<br />'
+                -%}
+                {%- liquid
+                  assign vp_insignia_ok = true
+                  assign vp_ins_txt = b.insignia
+                  assign vp_ins_up = b.insignia | upcase
+                  if vp_ins_up contains 'CUOTA'
+                    assign vp_ins_txt = ''
+                  endif
+                  if s.cyber_activo
+                    if contador_packs == 3 and s.cyber_ins_pack3 != blank
+                      assign vp_ins_txt = s.cyber_ins_pack3
+                    elsif contador_packs == 4 and s.cyber_ins_pack4 != blank
+                      assign vp_ins_txt = s.cyber_ins_pack4
+                    endif
+                  endif
+                  if vp_ins_txt == blank
+                    assign vp_insignia_ok = false
+                  endif
+                -%}
+                <label class="velora-producto__pack{% if es_elegido %} velora-producto__pack--activo{% endif %}{% if vp_insignia_ok %} velora-producto__pack--insignia{% endif %}" data-pack {{ block.shopify_attributes }}>
+                  {%- if vp_insignia_ok -%}
+                    <span class="velora-producto__pack-insignia">{{ vp_ins_txt | escape }}</span>
+                  {%- endif -%}
+                  <span class="velora-producto__pack-cuerpo">
+                    <input
+                      type="radio"
+                      class="velora-producto__pack-input"
+                      name="velora-pack-{{ section.id }}"
+                      value="{{ variante.id }}"
+                      {% if es_elegido %}checked{% endif %}
+                      data-pack-input
+                      data-variante="{{ variante.id }}"
+                      data-cantidad="{{ b.cantidad }}"
+                      data-precio="{{ precio_txt }}"
+                      data-ahorro="{{ ahorro_txt }}"
+                      data-regalo="{{ regalo_id }}"
+                      data-disponible="{{ variante.available }}"
+                      data-total="{{ total }}"
+                      data-comparado="{{ comparado }}"
+                      data-unidades="{{ b.unidades }}"
+                      data-cyber="{% if b.excluir_cyber %}0{% else %}1{% endif %}"
+                      data-cuotas="{{ cuotas_n }}"
+                      data-cuota="{{ cuota_txt }}"
+                    >
+                    {%- if s.mostrar_circulo -%}
+                      <span class="velora-producto__pack-circulo" aria-hidden="true"></span>
+                    {%- endif -%}
+                    {%- if b.imagen != blank -%}
+                      <span class="velora-producto__pack-media{% if repeticiones > 1 %} velora-producto__pack-media--pila{% endif %}" aria-hidden="true">
+                        {%- for i in (1..repeticiones) -%}
+                          {{ b.imagen | image_url: width: 180 | image_tag: class: 'velora-producto__pack-img', loading: 'lazy', alt: '' }}
+                        {%- endfor -%}
+                      </span>
+                    {%- endif -%}
+                    <span class="velora-producto__pack-info">
+                      <span class="velora-producto__pack-titulo">
+                        {{ b.titulo | escape }}
+                        {%- if b.chip != blank -%}<span class="velora-producto__pack-chip">{{ b.chip | escape }}</span>{%- endif -%}
+                      </span>
+                      {%- if s.mostrar_precio_unidad and s.texto_precio_unidad != blank -%}
+                        <span class="velora-producto__pack-unidad" data-vpc-unidad>{{ s.texto_precio_unidad | replace: '[precio]', unidad_txt }}</span>
+                      {%- endif -%}
+                      {%- if b.bajada != blank -%}<span class="velora-producto__pack-bajada">{{ b.bajada | escape }}</span>{%- endif -%}
+                      {%- if cuota_txt != blank -%}<span class="velora-producto__pack-cuotas" data-vp-cuotas><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg><span>{{ s.cuotas_texto_pack | replace: '[n]', cuotas_n | replace: '[monto]', cuota_txt | escape }}</span></span>{%- endif -%}
+                    </span>
+                    <span class="velora-producto__pack-precios">
+                      <span class="velora-producto__pack-precio" data-vpc-precio>{{ precio_txt }}</span>
+                      {%- if s.mostrar_tachado and comparado > total -%}
+                        <s class="velora-producto__pack-tachado" data-vpc-tachado>{{ comparado_txt }}</s>
+                      {%- elsif s.cyber_activo -%}
+                        <s class="velora-producto__pack-tachado" data-vpc-tachado hidden></s>
+                      {%- endif -%}
+                      {%- if s.cyber_activo -%}<span class="vpc-pill" data-vpc-pill hidden></span>{%- endif -%}
+                    </span>
+                  </span>
+                  {%- if request.design_mode -%}
+                    <span class="velora-producto__pack-vinculo{% if vinculo == blank %} velora-producto__pack-vinculo--error{% endif %}">
+                      {%- if vinculo == blank -%}
+                        {%- if b.nombre_variante != blank -%}No encontramos «{{ b.nombre_variante | escape }}» en «{{ producto.title | escape }}».{%- else -%}«{{ producto.title | escape }}» no tiene variante en la posición pedida.{%- endif %} Mirá la lista de variantes de arriba.
+                      {%- else -%}
+                        Vinculado a: {% if vinculo == 'producto' %}{{ b.producto_oferta.title | escape }}{% else %}{{ variante.title | escape }}{% endif %} · {{ variante.price | money }}{% if b.cantidad > 1 %} × {{ b.cantidad }}{% endif %}
+                      {%- endif -%}
+                    </span>
+                  {%- endif -%}
+                  {%- if b.incluye != blank -%}
+                    <span class="velora-producto__pack-incluye">
+                      <span class="velora-producto__pack-incluye-interno">
+                        {%- if s.texto_incluye != blank -%}<span class="velora-producto__pack-incluye-titulo">{{ s.texto_incluye | escape }}</span>{%- endif -%}
+                        <span class="velora-producto__pack-incluye-lista">
+                          {%- for linea in lineas_incluye -%}
+                            {%- assign l = linea | strip -%}
+                            {%- if l != blank -%}
+                              <span class="velora-producto__pack-incluye-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12.5l4 4L18 8"/></svg>{{ l | escape }}</span>
+                            {%- endif -%}
+                          {%- endfor -%}
+                        </span>
+                      </span>
+                    </span>
+                  {%- endif -%}
+                  {%- if b.regalo_texto != blank -%}
+                    <span class="velora-producto__pack-regalo">
+                      {%- if b.regalo_imagen != blank -%}
+                        {{ b.regalo_imagen | image_url: width: 120 | image_tag: class: 'velora-producto__pack-regalo-imagen', loading: 'lazy', alt: '' }}
+                      {%- else -%}
+                        <span class="velora-producto__pack-regalo-icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="9" width="17" height="11.5" rx="1.5"/><path d="M2.5 9h19v-.5a1.5 1.5 0 0 0-1.5-1.5H4a1.5 1.5 0 0 0-1.5 1.5z"/><path d="M12 7v13.5"/><path d="M12 7c-1.5-3-5-3.5-5-1.2C7 7 9.5 7 12 7zM12 7c1.5-3 5-3.5 5-1.2C17 7 14.5 7 12 7z"/></svg></span>
+                      {%- endif -%}
+                      <span class="velora-producto__pack-regalo-texto">{{ b.regalo_texto | escape }}</span>
+                      {%- if b.regalo_valor != blank -%}<s class="velora-producto__pack-regalo-valor">{{ b.regalo_valor | escape }}</s>{%- endif -%}
+                    </span>
+                  {%- endif -%}
+                </label>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+
+          {%- if hay_datos -%}
+            <div class="velora-producto__datos">
+              {%- for block in section.blocks -%}
+                {%- assign vp_dato_up = block.settings.texto | upcase -%}
+                {%- assign vp_dato_ok = true -%}{%- if vp_dato_up contains 'CUOTA' -%}{%- assign vp_dato_ok = false -%}{%- endif -%}
+                {%- if block.type == 'dato_rapido' and block.settings.texto != blank and block.settings.icono != 'cuotas' and vp_dato_ok -%}
+                  <span class="velora-producto__dato" {{ block.shopify_attributes }}>
+                    {%- case block.settings.icono -%}
+                      {%- when 'envio' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg>
+                      {%- when 'reloj' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                      {%- when 'seguro' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                      {%- when 'cuotas' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+                      {%- when 'whatsapp' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8.1 19z"/><path d="M9.5 9.5c.4 2 2 3.6 4 4l1-1.1 1.8.8"/></svg>
+                    {%- endcase -%}
+                    {{ block.settings.texto | escape }}
+                  </span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          {%- if s.mostrar_ahorro and s.texto_ahorro != blank -%}
+            {%- assign partes_ahorro = s.texto_ahorro | split: '[monto]' -%}
+            <p class="velora-producto__ahorro" style="--vp-ahorro:{{ s.color_ahorro }};" data-ahorro-caja {% if sel_ahorro == blank %}hidden{% endif %}>
+              <svg class="velora-producto__ahorro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              <span>{{ partes_ahorro[0] | escape }}<strong data-ahorro-monto>{{ sel_ahorro }}</strong>{{ partes_ahorro[1] | escape }}</span>
+            </p>
+          {%- endif -%}
+
+          <form method="post" action="{{ routes.cart_add_url }}" class="velora-producto__formulario" data-formulario novalidate>
+            <input type="hidden" name="id" value="{{ sel_id }}" data-id>
+            <input type="hidden" name="quantity" value="{{ sel_cant }}" data-cantidad>
+            <button type="submit" class="velora-producto__boton{% if s.mostrar_flecha %} velora-producto__boton--flecha{% endif %}" data-boton {% unless sel_disponible %}disabled{% endunless %}>
+              <span class="velora-producto__boton-contenido">
+                {%- if s.mostrar_icono_carrito -%}
+                  <svg class="velora-producto__boton-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17.5" cy="19.5" r="1.3"/><path d="M3 4h2.2l2.3 11h11l2-8H6.4"/></svg>
+                {%- endif -%}
+                <span data-boton-texto>{% if sel_disponible %}{{ s.texto_boton | escape }}{% else %}{{ s.texto_agotado | escape }}{% endif %}</span>
+                {%- if s.mostrar_precio_boton -%}
+                  <span class="velora-producto__boton-separador" aria-hidden="true"></span>
+                  <span class="velora-producto__boton-precio" data-boton-precio>{{ sel_precio }}</span>
+                {%- endif -%}
+              </span>
+              {%- if s.mostrar_flecha -%}
+                <span class="velora-producto__boton-flecha" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+              {%- endif -%}
+              <span class="velora-producto__boton-cargando" aria-hidden="true"></span>
+            </button>
+            {%- if false -%}
+              <p class="velora-producto__cuotas-linea" data-vp-cuotas data-cuotas-linea data-plantilla="{{ s.cuotas_texto_pack | escape }}"{% if sel_cuota_txt == blank %} hidden{% endif %}>
+                o <strong>{{ s.cuotas_texto_pack | replace: '[n]', sel_cuotas | replace: '[monto]', sel_cuota_txt | escape }}</strong> {{ s.cuotas_sufijo | escape }}
+              </p>
+            {%- endif -%}
+            <p class="velora-producto__error" role="alert" data-error hidden></p>
+          </form>
+
+          {%- if s.cyber_activo and s.cyber_mostrar_reloj -%}
+            <div class="vpc-reloj" data-vpc-reloj{% unless s.pre_activo %} hidden{% endunless %}>
+              <div class="vpc-reloj__fila">
+                {%- if vpc_logo != blank -%}<img class="vpc-logo" src="{{ vpc_logo }}" alt="Velora Cyber" width="400" height="209" loading="lazy">{%- else -%}<span class="vpc-mini" aria-hidden="true"><span class="vpc-mini__brillo"></span><span class="vpc-mini__v">VELORA</span><span class="vpc-mini__c">CYBER<svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor"/></svg></span><span class="vpc-mini__l">OFF</span></span>{%- endif -%}
+                <p class="vpc-reloj__txt" data-vpc-reloj-t>{{ s.cyber_reloj_pre | escape }}</p>
+                <div class="vpc-reloj__nums" data-vpc-nums>
+                  <span><b data-vpc-n1>??</b><small data-vpc-l1>días</small></span><span><b data-vpc-n2>??</b><small data-vpc-l2>hs</small></span><span><b data-vpc-n3>??</b><small data-vpc-l3>min</small></span>
+                </div>
+              </div>
+              <p class="vpc-reloj__ahorro" data-vpc-hoyahorro hidden><span data-vpc-ahorro-t>{{ s.cyber_ahorro_texto | escape }}</span> <strong data-vpc-ahorro-m></strong><s class="vpc-reloj__ahorro-ref" data-vpc-ahorro-ref></s></p>
+              <p class="vpc-reloj__pie" data-vpc-reloj-pie>{{ s.cyber_reloj_pre_pie | escape }}</p>
+            </div>
+          {%- endif -%}
+
+          {%- if s.mostrar_tanda and s.texto_tanda != blank -%}
+            {%- capture tanda_fuerte -%}<strong>{{ s.tanda_porcentaje }}%</strong>{%- endcapture -%}
+            <div class="velora-producto__tanda velora-producto__tanda--{{ s.alineacion_tanda }}" style="--vp-tanda:{{ s.color_tanda }};--vp-tanda-pct:{{ s.tanda_porcentaje }}%;">
+              <p class="velora-producto__tanda-texto">
+                <span class="velora-producto__tanda-punto" aria-hidden="true"></span>
+                <span>{{ s.texto_tanda | escape | replace: '[porcentaje]', tanda_fuerte }}</span>
+              </p>
+              {%- if s.mostrar_barra_tanda -%}
+                <span class="velora-producto__tanda-barra" aria-hidden="true"><span class="velora-producto__tanda-relleno"></span></span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if s.texto_garantia != blank -%}
+            <div class="velora-producto__garantia">
+              <span class="velora-producto__garantia-icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+              <p>{{ s.texto_garantia }}</p>
+            </div>
+          {%- endif -%}
+
+          {%- if s.mostrar_pagos -%}
+            <div class="velora-producto__pagos" aria-label="Medios de pago">
+              {%- if s.fuente_pagos == 'automatico' -%}
+                {%- for tipo in shop.enabled_payment_types -%}
+                  <span class="velora-producto__pago">{{ tipo | payment_type_svg_tag: class: 'velora-producto__pago-svg' }}</span>
+                {%- endfor -%}
+              {%- else -%}
+                {%- assign lista_pagos = s.lista_pagos | split: ',' -%}
+                {%- for tipo in lista_pagos -%}
+                  {%- assign t = tipo | strip -%}
+                  {%- if t != blank -%}
+                    <span class="velora-producto__pago">{{ t | payment_type_svg_tag: class: 'velora-producto__pago-svg' }}</span>
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+              {%- if s.logo_pago_extra_1 != blank -%}
+                <span class="velora-producto__pago velora-producto__pago--imagen">{{ s.logo_pago_extra_1 | image_url: height: 60 | image_tag: loading: 'lazy', alt: s.logo_pago_extra_1.alt | default: 'Medio de pago' }}</span>
+              {%- endif -%}
+              {%- if s.logo_pago_extra_2 != blank -%}
+                <span class="velora-producto__pago velora-producto__pago--imagen">{{ s.logo_pago_extra_2 | image_url: height: 60 | image_tag: loading: 'lazy', alt: s.logo_pago_extra_2.alt | default: 'Medio de pago' }}</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if hay_confianza -%}
+          <div class="velora-producto__confianza">
+            {%- for block in section.blocks -%}
+              {%- assign vp_conf_up = block.settings.titulo | upcase -%}
+              {%- if block.type == 'confianza' and block.settings.icono != 'cuotas' and vp_conf_up contains 'CUOTA' -%}{%- continue -%}{%- endif -%}
+              {%- if block.type == 'confianza' and block.settings.icono != 'cuotas' -%}
+                <div class="velora-producto__confianza-item" {{ block.shopify_attributes }}>
+                  <span class="velora-producto__confianza-icono" aria-hidden="true">
+                    {%- case block.settings.icono -%}
+                      {%- when 'garantia' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                      {%- when 'seguro' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                      {%- when 'envio' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg>
+                      {%- when 'cuotas' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+                      {%- when 'whatsapp' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.3-3.9A8 8 0 1 1 8.1 19z"/><path d="M9.5 9.5c.4 2 2 3.6 4 4l1-1.1 1.8.8"/></svg>
+                      {%- when 'argentina' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-2.5 3.5L18 11H5"/></svg>
+                      {%- when 'reloj' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    {%- endcase -%}
+                  </span>
+                  <span class="velora-producto__confianza-textos">
+                    <strong>{{ block.settings.titulo | escape }}</strong>
+                    {%- if block.settings.bajada != blank -%}<span>{{ block.settings.bajada | escape }}</span>{%- endif -%}
+                  </span>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if hay_abajo -%}
+          <div class="velora-producto__acordeones velora-producto__acordeones--abajo">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'acordeon' and block.settings.ubicacion == 'abajo' -%}
+                <details class="velora-producto__acordeon"{% if block.settings.abierto %} open{% endif %} {{ block.shopify_attributes }}>
+                  <summary class="velora-producto__acordeon-titulo">
+                    <span>{{ block.settings.titulo | escape }}</span>
+                    <span class="velora-producto__acordeon-mas" aria-hidden="true"></span>
+                  </summary>
+                  <div class="velora-producto__acordeon-contenido">{{ block.settings.contenido }}</div>
+                </details>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if cantidad_resenas > 0 -%}
+          <velora-producto-resenas class="velora-producto__resenas" data-intervalo="{{ s.resenas_intervalo }}">
+            <div class="velora-producto__resenas-pista">
+              {%- assign indice_resena = 0 -%}
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'resena' -%}
+                  {%- liquid
+                    assign r = block.settings
+                    assign inicial_resena = r.nombre | strip | slice: 0 | upcase
+                  -%}
+                  <figure class="velora-producto__resena{% if indice_resena == 0 %} velora-producto__resena--activa{% endif %}" data-resena="{{ indice_resena }}" {{ block.shopify_attributes }}>
+                    <span class="velora-producto__resena-foto">
+                      {%- if r.foto != blank -%}
+                        {{ r.foto | image_url: width: 220 | image_tag: loading: 'lazy', alt: r.nombre, class: 'velora-producto__resena-img' }}
+                      {%- else -%}
+                        <span class="velora-producto__resena-inicial" aria-hidden="true">{{ inicial_resena }}</span>
+                      {%- endif -%}
+                    </span>
+                    <figcaption class="velora-producto__resena-cuerpo">
+                      <span class="velora-producto__resena-arriba">
+                        {%- if r.etiqueta != blank -%}<span class="velora-producto__resena-chip">{{ r.etiqueta | escape }}</span>{%- endif -%}
+                        {%- if r.estrellas > 0 -%}
+                          <span class="velora-producto__resena-estrellas" role="img" aria-label="{{ r.estrellas }} de 5">
+                            {%- for i in (1..5) -%}<svg class="{% if i <= r.estrellas %}velora-producto__resena-estrella--llena{% endif %}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z"/></svg>{%- endfor -%}
+                          </span>
+                        {%- endif -%}
+                      </span>
+                      {%- if r.titulo != blank -%}<strong class="velora-producto__resena-titulo">{{ r.titulo | escape }}</strong>{%- endif -%}
+                      {%- if r.texto != blank -%}<span class="velora-producto__resena-texto">“{{ r.texto | escape }}”</span>{%- endif -%}
+                      {%- if r.nombre != blank or r.detalle != blank -%}
+                        <span class="velora-producto__resena-autor">
+                          {%- if r.nombre != blank -%}<b>{{ r.nombre | escape }}</b>{%- endif -%}
+                          {%- if r.detalle != blank -%}<small>{{ r.detalle | escape }}</small>{%- endif -%}
+                        </span>
+                      {%- endif -%}
+                    </figcaption>
+                  </figure>
+                  {%- assign indice_resena = indice_resena | plus: 1 -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+            {%- if cantidad_resenas > 1 -%}
+              <div class="velora-producto__resenas-puntos" role="tablist" aria-label="Reseñas">
+                {%- for i in (1..cantidad_resenas) -%}
+                  <button type="button" class="velora-producto__resenas-punto{% if forloop.first %} velora-producto__resenas-punto--activo{% endif %}" data-ir="{{ forloop.index0 }}" aria-label="Reseña {{ i }}"></button>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </velora-producto-resenas>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+</velora-producto>
+
+{% stylesheet %}
+.velora-producto {
+  display: block !important;
+  background: var(--vp-fondo) !important;
+  color: var(--vp-tinta) !important;
+  font-family: 'Poppins', system-ui, sans-serif !important;
+  padding: var(--vp-pt-m) 0 var(--vp-pb-m) !important;
+}
+.velora-producto *,
+.velora-producto *::before,
+.velora-producto *::after {
+  box-sizing: border-box !important;
+}
+.velora-producto__contenedor {
+  max-width: var(--vp-max) !important;
+  margin: 0 auto !important;
+  padding: 0 16px !important;
+}
+.velora-producto__grilla {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 24px !important;
+}
+.velora-producto__galeria {
+  position: relative !important;
+  min-width: 0 !important;
+}
+.velora-producto__pista {
+  display: flex !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-behavior: smooth !important;
+  scrollbar-width: none !important;
+  border-radius: 14px !important;
+  background: var(--vp-niebla) !important;
+}
+.velora-producto__pista::-webkit-scrollbar {
+  display: none !important;
+}
+.velora-producto__slide {
+  flex: 0 0 100% !important;
+  scroll-snap-align: start !important;
+  aspect-ratio: var(--vp-relacion) !important;
+  overflow: hidden !important;
+}
+.velora-producto__medio,
+.velora-producto__slide img,
+.velora-producto__slide video,
+.velora-producto__slide iframe,
+.velora-producto__slide svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: var(--vp-ajuste) !important;
+  border: 0 !important;
+}
+.velora-producto__puntos {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin-top: 12px !important;
+}
+.velora-producto__punto {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 6px !important;
+  height: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--vp-linea) !important;
+  cursor: pointer !important;
+  transition: width 0.3s ease, background-color 0.3s ease !important;
+}
+.velora-producto__punto--activo {
+  width: 20px !important;
+  background: var(--vp-tinta) !important;
+}
+.velora-producto__miniaturas {
+  display: none !important;
+}
+.velora-producto__info {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.velora-producto__prueba {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+.velora-producto__avatares {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.velora-producto__avatar {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 999px !important;
+  object-fit: cover !important;
+  border: 2px solid var(--vp-fondo) !important;
+  background: var(--vp-niebla) !important;
+}
+.velora-producto__avatar + .velora-producto__avatar {
+  margin-left: -9px !important;
+}
+.velora-producto__verificado {
+  display: inline-flex !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--vp-azul) !important;
+  flex-shrink: 0 !important;
+}
+.velora-producto__verificado svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.velora-producto__prueba-texto {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--vp-tinta) !important;
+  line-height: 1.3 !important;
+}
+.velora-producto__rating {
+  display: inline-flex !important;
+  align-self: flex-start !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--vp-tinta) !important;
+  text-decoration: none !important;
+}
+.velora-producto__rating strong {
+  font-weight: 700 !important;
+}
+.velora-producto__estrellas {
+  display: inline-flex !important;
+  gap: 1px !important;
+  color: var(--vp-estrellas) !important;
+}
+.velora-producto__estrellas svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+.velora-producto__rating-texto {
+  color: var(--vp-piedra) !important;
+  font-weight: 400 !important;
+}
+.velora-producto__rating:hover .velora-producto__rating-texto {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+.velora-producto__etiquetas {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px 10px !important;
+  margin-bottom: 10px !important;
+}
+.velora-producto__etiqueta {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 24px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--vp-azul) 10%, #FFFFFF) !important;
+  color: var(--vp-tinta) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+.velora-producto__etiqueta-secundaria {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__titulo {
+  margin: 0 !important;
+  font-family: 'Poppins', system-ui, sans-serif !important;
+  font-weight: 700 !important;
+  font-size: var(--vp-titulo-m) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto--titulos-arimo .velora-producto__titulo {
+  font-family: 'Arimo', 'Helvetica Neue', Arial, sans-serif !important;
+  font-weight: 400 !important;
+}
+.velora-producto__subtitulo {
+  margin: 10px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__checks {
+  list-style: none !important;
+  margin: 16px 0 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  gap: 10px !important;
+}
+.velora-producto--checks-lineas .velora-producto__checks {
+  gap: 0 !important;
+}
+.velora-producto__check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-family: 'Poppins', system-ui, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto--checks-lineas .velora-producto__check {
+  padding: 12px 0 !important;
+  border-bottom: 1px solid var(--vp-linea) !important;
+}
+.velora-producto--checks-lineas .velora-producto__check:last-child {
+  border-bottom: 0 !important;
+}
+.velora-producto--titulos-arimo .velora-producto__check {
+  font-family: 'Arimo', 'Helvetica Neue', Arial, sans-serif !important;
+  font-weight: 400 !important;
+}
+.velora-producto__check-icono {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, var(--vp-azul), var(--vp-celeste)) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--vp-azul) 30%, transparent) !important;
+}
+.velora-producto__check-icono svg {
+  width: 20px !important;
+  height: 20px !important;
+  overflow: visible !important;
+}
+.velora-producto__bi-mancha,
+.velora-producto__bi-chispa,
+.velora-producto__bi-baldosa,
+.velora-producto__bi-gota,
+.velora-producto__bi-estrella,
+.velora-producto__bi-niebla {
+  transform-box: fill-box !important;
+  transform-origin: center !important;
+}
+.velora-producto__bi-aguja {
+  transform-box: view-box !important;
+  transform-origin: 12px 13px !important;
+}
+.velora-producto__bi-trazo {
+  stroke-dasharray: 1 1 !important;
+}
+.velora-producto--animado .velora-producto__check-icono--mancha .velora-producto__bi-mancha {
+  animation: velora-producto-bi-mancha 4.2s ease-in-out calc(var(--m) * 0.12s + 0.8s) infinite both !important;
+}
+.velora-producto--animado .velora-producto__check-icono--mancha .velora-producto__bi-chispa {
+  animation: velora-producto-bi-chispa 4.2s ease-in-out 0.8s infinite both !important;
+}
+.velora-producto--animado .velora-producto__check-icono--reloj .velora-producto__bi-aguja {
+  animation: velora-producto-bi-aguja 3.6s cubic-bezier(0.65, 0, 0.35, 1) 1s infinite !important;
+}
+.velora-producto--animado .velora-producto__check-icono--azulejo .velora-producto__bi-baldosa {
+  animation: velora-producto-bi-baldosa 3.8s ease-in-out 1.2s infinite both !important;
+}
+.velora-producto--animado .velora-producto__check-icono--gota .velora-producto__bi-gota {
+  animation: velora-producto-bi-gota 2.6s ease-in-out infinite !important;
+}
+.velora-producto--animado .velora-producto__check-icono--brillo .velora-producto__bi-estrella {
+  animation: velora-producto-bi-estrella 2.8s ease-in-out infinite !important;
+}
+.velora-producto--animado .velora-producto__check-icono--brillo .velora-producto__bi-estrella--chica {
+  animation-delay: 1.4s !important;
+}
+.velora-producto--animado .velora-producto__check-icono--spray .velora-producto__bi-niebla {
+  animation: velora-producto-bi-niebla 1.8s ease-out calc(var(--m) * 0.15s) infinite both !important;
+}
+.velora-producto--js.velora-producto--animado .velora-producto__bi-trazo {
+  animation: velora-producto-bi-trazo 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.9s both !important;
+}
+@keyframes velora-producto-bi-mancha {
+  0%, 10% { opacity: 1; transform: scale(1); }
+  38%, 82% { opacity: 0; transform: scale(0.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes velora-producto-bi-chispa {
+  0%, 34% { opacity: 0; transform: scale(0.2) rotate(-45deg); }
+  48% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+  58%, 76% { opacity: 1; transform: scale(1) rotate(0deg); }
+  88%, 100% { opacity: 0; transform: scale(0.2) rotate(45deg); }
+}
+@keyframes velora-producto-bi-aguja {
+  0% { transform: rotate(0deg); }
+  70%, 100% { transform: rotate(360deg); }
+}
+@keyframes velora-producto-bi-baldosa {
+  0%, 20% { opacity: 0; transform: scale(0.4); }
+  40%, 70% { opacity: 0.9; transform: scale(1); }
+  90%, 100% { opacity: 0; transform: scale(0.4); }
+}
+@keyframes velora-producto-bi-gota {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes velora-producto-bi-estrella {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.55; transform: scale(0.75) rotate(45deg); }
+}
+@keyframes velora-producto-bi-niebla {
+  0% { opacity: 0; transform: translate(-3px, 0) scale(0.5); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(2px, 0) scale(1.2); }
+}
+@keyframes velora-producto-bi-trazo {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.velora-producto__acordeones {
+  margin-top: 16px !important;
+  border-top: 1px solid var(--vp-linea) !important;
+}
+.velora-producto__acordeones--abajo {
+  margin-top: 20px !important;
+}
+.velora-producto__acordeon {
+  border-bottom: 1px solid var(--vp-linea) !important;
+}
+.velora-producto__acordeon-titulo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 16px 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  list-style: none !important;
+}
+.velora-producto__acordeon-titulo::-webkit-details-marker {
+  display: none !important;
+}
+.velora-producto__acordeon-mas {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  border: 1.5px solid var(--vp-linea) !important;
+  transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease !important;
+}
+.velora-producto__acordeon-mas::before,
+.velora-producto__acordeon-mas::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 10px !important;
+  height: 1.5px !important;
+  background: var(--vp-azul) !important;
+  transform: translate(-50%, -50%) !important;
+  transition: background-color 0.3s ease !important;
+}
+.velora-producto__acordeon-mas::after {
+  transform: translate(-50%, -50%) rotate(90deg) !important;
+}
+.velora-producto__acordeon[open] .velora-producto__acordeon-mas {
+  transform: rotate(45deg) !important;
+  background: var(--vp-tinta) !important;
+  border-color: var(--vp-tinta) !important;
+}
+.velora-producto__acordeon[open] .velora-producto__acordeon-mas::before,
+.velora-producto__acordeon[open] .velora-producto__acordeon-mas::after {
+  background: #FFFFFF !important;
+}
+.velora-producto__acordeon-contenido {
+  padding: 0 0 16px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__acordeon[open] .velora-producto__acordeon-contenido {
+  animation: velora-producto-abrir 0.35s ease both;
+}
+.velora-producto__acordeon-contenido p {
+  margin: 0 0 8px !important;
+}
+.velora-producto__acordeon-contenido p:last-child {
+  margin-bottom: 0 !important;
+}
+.velora-producto__resenas {
+  display: block !important;
+  margin-top: 20px !important;
+}
+.velora-producto__resenas-pista {
+  display: grid !important;
+  touch-action: pan-y !important;
+}
+.velora-producto__resenas--deslizable .velora-producto__resenas-pista {
+  cursor: grab !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+.velora-producto__resenas--arrastrando .velora-producto__resenas-pista {
+  cursor: grabbing !important;
+}
+.velora-producto__resenas--arrastrando .velora-producto__resena {
+  transition: none !important;
+}
+.velora-producto__resena {
+  grid-area: 1 / 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+  border: 1px solid var(--vp-linea) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--vp-niebla) 70%, #FFFFFF) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(6px) !important;
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s !important;
+}
+.velora-producto__resena--activa {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(var(--vp-arrastre, 0px)) !important;
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0s !important;
+}
+.velora-producto__resena-foto {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 72px !important;
+  height: 72px !important;
+  padding: 3px !important;
+  border-radius: 999px !important;
+  background: var(--vp-azul) !important;
+}
+.velora-producto__resena-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 2px solid #FFFFFF !important;
+  border-radius: 999px !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+}
+.velora-producto__resena-inicial {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 2px solid #FFFFFF !important;
+  border-radius: 999px !important;
+  background: var(--vp-niebla) !important;
+  color: var(--vp-azul) !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+}
+.velora-producto__resena-cuerpo {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+.velora-producto__resena-arriba {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.velora-producto__resena-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--vp-azul) 12%, #FFFFFF) !important;
+  color: var(--vp-azul) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+}
+.velora-producto__resena-estrellas {
+  display: inline-flex !important;
+  gap: 1px !important;
+}
+.velora-producto__resena-estrellas svg {
+  width: 13px !important;
+  height: 13px !important;
+  fill: var(--vp-linea) !important;
+}
+.velora-producto__resena-estrellas .velora-producto__resena-estrella--llena {
+  fill: var(--vp-estrellas) !important;
+}
+.velora-producto__resena-titulo {
+  font-family: 'Poppins', system-ui, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.01em !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto--titulos-arimo .velora-producto__resena-titulo {
+  font-family: 'Arimo', 'Helvetica Neue', Arial, sans-serif !important;
+}
+.velora-producto__resena-texto {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__resena-autor {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 2px 8px !important;
+  margin-top: 2px !important;
+}
+.velora-producto__resena-autor b {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__resena-autor small {
+  font-size: 11px !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__resenas-puntos {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin-top: 10px !important;
+}
+.velora-producto__resenas-punto {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 7px !important;
+  height: 7px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--vp-linea) !important;
+  cursor: pointer !important;
+  transition: width 0.3s ease, background-color 0.3s ease !important;
+}
+.velora-producto__resenas-punto--activo {
+  width: 20px !important;
+  background: var(--vp-azul) !important;
+}
+.velora-producto__resenas-punto:focus-visible {
+  outline: 2px solid var(--vp-azul) !important;
+  outline-offset: 2px !important;
+}
+.velora-producto__separador {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin: 24px 0 12px !important;
+}
+.velora-producto__separador::before,
+.velora-producto__separador::after {
+  content: "" !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: color-mix(in srgb, var(--vp-azul) 35%, var(--vp-linea)) !important;
+}
+.velora-producto__separador span {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__nota {
+  margin: -2px 0 14px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--vp-piedra) !important;
+  text-align: center !important;
+}
+.velora-producto__nota strong {
+  color: var(--vp-tinta) !important;
+  font-weight: 600 !important;
+}
+.velora-producto__packs {
+  display: grid !important;
+  gap: 12px !important;
+}
+.velora-producto__pack {
+  position: relative !important;
+  display: block !important;
+  border: 1.5px solid var(--vp-linea) !important;
+  border-radius: var(--vp-pack-radio) !important;
+  background: var(--vp-pack-fondo) !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+  transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.velora-producto__pack:hover {
+  border-color: color-mix(in srgb, var(--vp-azul) 45%, var(--vp-linea)) !important;
+}
+.velora-producto__pack--insignia {
+  margin-top: 8px !important;
+}
+.velora-producto__pack--activo {
+  border-color: var(--vp-pack-activo-borde) !important;
+  background: var(--vp-pack-activo-fondo) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--vp-pack-activo-borde) 18%, transparent) !important;
+}
+.velora-producto__pack:has(.velora-producto__pack-input:focus-visible) {
+  outline: 2px solid var(--vp-azul) !important;
+  outline-offset: 3px !important;
+}
+.velora-producto__pack-insignia {
+  position: absolute !important;
+  top: -11px !important;
+  right: 14px !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 22px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  background: var(--vp-insignia-fondo) !important;
+  color: var(--vp-insignia-texto) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-insignia {
+  background: var(--vp-azul) !important;
+}
+.velora-producto__pack-cuerpo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px 14px !important;
+}
+.velora-producto__pack-input {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+.velora-producto__pack-circulo {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+  border: 1.5px solid var(--vp-linea) !important;
+  background: #FFFFFF !important;
+  transition: border-color 0.25s ease !important;
+}
+.velora-producto__pack-circulo::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4px !important;
+  border-radius: 999px !important;
+  background: var(--vp-azul) !important;
+  transform: scale(0) !important;
+  transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1) !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-circulo {
+  border-color: var(--vp-azul) !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-circulo::after {
+  transform: scale(1) !important;
+}
+.velora-producto__pack-media {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.velora-producto__pack-img {
+  display: block !important;
+  width: var(--vp-img) !important;
+  height: var(--vp-img) !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) !important;
+}
+.velora-producto__pack-media--pila .velora-producto__pack-img {
+  width: calc(var(--vp-img) * 0.82) !important;
+  height: calc(var(--vp-img) * 0.82) !important;
+  box-shadow: none !important;
+}
+.velora-producto__pack-media--pila .velora-producto__pack-img + .velora-producto__pack-img {
+  margin-left: calc(var(--vp-img) * -0.5) !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-media--pila .velora-producto__pack-img {
+  box-shadow: none !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-img {
+  transform: translateY(-2px) !important;
+}
+.velora-producto__pack-info {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+.velora-producto__pack-titulo {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px 8px !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+}
+.velora-producto__pack-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 22px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  background: var(--vp-chip-fondo) !important;
+  color: var(--vp-chip-texto) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+.velora-producto__pack-unidad {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--vp-unidad) !important;
+}
+.velora-producto__pack-bajada {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto__pack-precios {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 1px !important;
+  text-align: right !important;
+}
+.velora-producto__pack-precio {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  white-space: nowrap !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__pack-tachado {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--vp-tachado) !important;
+  white-space: nowrap !important;
+}
+.velora-producto__pack-incluye {
+  display: grid !important;
+  grid-template-rows: 0fr !important;
+  transition: grid-template-rows 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-incluye {
+  grid-template-rows: 1fr !important;
+}
+.velora-producto__pack-incluye-interno {
+  overflow: hidden !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 0 14px !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease, padding 0.4s ease !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-incluye-interno {
+  padding: 2px 14px 14px !important;
+  opacity: 1 !important;
+  transition-delay: 0.1s !important;
+}
+.velora-producto__pack-incluye-titulo {
+  padding-top: 12px !important;
+  border-top: 1px dashed color-mix(in srgb, var(--vp-azul) 35%, var(--vp-linea)) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__pack-incluye-lista {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px 12px !important;
+}
+.velora-producto__pack-incluye-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__pack-incluye-item svg {
+  flex-shrink: 0 !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin-top: 1px !important;
+  color: var(--vp-azul) !important;
+}
+.velora-producto__pack-regalo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 14px !important;
+  border-radius: 0 0 calc(var(--vp-pack-radio) - 1.5px) calc(var(--vp-pack-radio) - 1.5px) !important;
+  background: var(--vp-regalo-off) !important;
+  color: #FFFFFF !important;
+  transition: background-color 0.3s ease !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-regalo {
+  background: var(--vp-regalo-on) !important;
+}
+.velora-producto__pack-regalo-imagen {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+  background: #FFFFFF !important;
+}
+.velora-producto__pack-regalo-icono {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  flex-shrink: 0 !important;
+}
+.velora-producto__pack-regalo-icono svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+.velora-producto__pack-regalo-texto {
+  flex: 1 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  line-height: 1.3 !important;
+}
+.velora-producto__pack-regalo-valor {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  opacity: 0.75 !important;
+  white-space: nowrap !important;
+}
+.velora-producto__datos {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 6px 18px !important;
+  margin-top: 16px !important;
+}
+.velora-producto__dato {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--vp-piedra) !important;
+  letter-spacing: 0.01em !important;
+}
+.velora-producto__dato svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+}
+.velora-producto__formulario {
+  margin-top: 14px !important;
+}
+.velora-producto__boton {
+  position: relative !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  padding: 0 20px !important;
+  border: 0 !important;
+  border-radius: var(--vp-boton-radio) !important;
+  background: var(--vp-boton-fondo) !important;
+  color: var(--vp-boton-texto) !important;
+  font-family: 'Poppins', system-ui, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--vp-boton-fondo) 32%, transparent) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease !important;
+}
+.velora-producto__boton--flecha {
+  padding: 0 64px !important;
+}
+.velora-producto__boton::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -60% !important;
+  width: 40% !important;
+  height: 100% !important;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent) !important;
+  transform: skewX(-18deg) !important;
+  pointer-events: none !important;
+}
+.velora-producto--animado .velora-producto__boton:not(:disabled)::after {
+  animation: velora-producto-brillo 5s ease-in-out 1.5s infinite;
+}
+.velora-producto__boton:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--vp-boton-fondo) 40%, transparent) !important;
+}
+.velora-producto__boton:active:not(:disabled) {
+  transform: scale(0.99) !important;
+}
+.velora-producto__boton:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+.velora-producto__boton:focus-visible {
+  outline: 2px solid var(--vp-tinta) !important;
+  outline-offset: 3px !important;
+}
+.velora-producto__boton-contenido {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  transition: opacity 0.2s ease !important;
+}
+.velora-producto__boton-icono {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+}
+.velora-producto__boton-separador {
+  width: 1px !important;
+  height: 18px !important;
+  background: currentColor !important;
+  opacity: 0.35 !important;
+}
+.velora-producto__boton-precio {
+  font-weight: 600 !important;
+}
+.velora-producto__boton-flecha {
+  position: absolute !important;
+  top: 50% !important;
+  right: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin-top: -19px !important;
+  border-radius: calc(var(--vp-boton-radio) * 0.6) !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), background-color 0.3s ease !important;
+}
+.velora-producto__boton-flecha svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+.velora-producto__boton:hover:not(:disabled) .velora-producto__boton-flecha {
+  transform: translateX(3px) !important;
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+.velora-producto__boton-cargando {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: -11px 0 0 -11px !important;
+  border-radius: 999px !important;
+  border: 2px solid currentColor !important;
+  border-right-color: transparent !important;
+  opacity: 0 !important;
+}
+.velora-producto__boton--cargando .velora-producto__boton-contenido,
+.velora-producto__boton--cargando .velora-producto__boton-flecha {
+  opacity: 0 !important;
+}
+.velora-producto__boton--cargando .velora-producto__boton-cargando {
+  opacity: 1 !important;
+  animation: velora-producto-girar 0.7s linear infinite;
+}
+.velora-producto__diagnostico {
+  margin: 0 0 12px !important;
+  padding: 10px 12px !important;
+  border: 1px dashed var(--vp-azul) !important;
+  border-radius: 10px !important;
+  background: color-mix(in srgb, var(--vp-azul) 6%, #FFFFFF) !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__diagnostico strong {
+  display: block !important;
+  margin-bottom: 4px !important;
+  font-weight: 700 !important;
+  color: var(--vp-azul) !important;
+}
+.velora-producto__diagnostico ol {
+  margin: 0 !important;
+  padding-left: 18px !important;
+}
+.velora-producto__pack-vinculo {
+  display: block !important;
+  margin: 0 14px 10px !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  background: color-mix(in srgb, var(--vp-azul) 10%, #FFFFFF) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--vp-azul) !important;
+}
+.velora-producto__pack-vinculo--error {
+  background: #FDECEC !important;
+  color: #9B1C1C !important;
+}
+.velora-producto__ahorro {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 16px 0 0 !important;
+  padding: 11px 14px !important;
+  border: 1px solid color-mix(in srgb, var(--vp-ahorro) 45%, #FFFFFF) !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--vp-ahorro) 7%, #FFFFFF) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__ahorro[hidden] {
+  display: none !important;
+}
+.velora-producto__ahorro strong {
+  font-weight: 700 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__ahorro-icono {
+  flex-shrink: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: var(--vp-ahorro) !important;
+}
+.velora-producto__ahorro + .velora-producto__formulario {
+  margin-top: 10px !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .velora-producto__ahorro--cambio strong {
+    display: inline-block !important;
+    animation: velora-producto-ahorro 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both !important;
+  }
+}
+@keyframes velora-producto-ahorro {
+  from { transform: scale(0.85); opacity: 0.4; }
+  to { transform: scale(1); opacity: 1; }
+}
+.velora-producto__tanda {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+.velora-producto__tanda--izquierda {
+  align-items: flex-start !important;
+}
+.velora-producto__tanda-texto {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__tanda-texto strong {
+  font-weight: 700 !important;
+  color: var(--vp-tanda) !important;
+}
+.velora-producto__tanda-punto {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--vp-tanda) !important;
+}
+.velora-producto__tanda-barra {
+  display: block !important;
+  width: 100% !important;
+  max-width: 260px !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: color-mix(in srgb, var(--vp-tanda) 16%, #FFFFFF) !important;
+}
+.velora-producto__tanda--izquierda .velora-producto__tanda-barra {
+  max-width: 100% !important;
+}
+.velora-producto__tanda-relleno {
+  display: block !important;
+  width: var(--vp-tanda-pct) !important;
+  height: 100% !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--vp-tanda), color-mix(in srgb, var(--vp-tanda) 65%, #FFFFFF)) !important;
+  transform-origin: left center !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .velora-producto--animado .velora-producto__tanda-punto::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: -4px !important;
+    border-radius: 999px !important;
+    background: var(--vp-tanda) !important;
+    animation: velora-producto-tanda-pulso 2s ease-out infinite both !important;
+  }
+  .velora-producto--js.velora-producto--animado .velora-producto__tanda-relleno {
+    animation: velora-producto-tanda-carga 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both !important;
+  }
+}
+@keyframes velora-producto-tanda-pulso {
+  0% { opacity: 0.45; transform: scale(0.6); }
+  80%, 100% { opacity: 0; transform: scale(1.6); }
+}
+@keyframes velora-producto-tanda-carga {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.velora-producto__error {
+  margin: 10px 0 0 !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  background: #FDECEC !important;
+  color: #9B1C1C !important;
+  font-size: 13px !important;
+}
+.velora-producto__error[hidden] {
+  display: none !important;
+}
+.velora-producto__garantia {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  background: var(--vp-niebla) !important;
+}
+.velora-producto__garantia-icono {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--vp-azul) !important;
+}
+.velora-producto__garantia-icono svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.velora-producto__garantia p {
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__garantia strong {
+  font-weight: 700 !important;
+}
+.velora-producto__pagos {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 18px !important;
+}
+.velora-producto__pago {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 28px !important;
+}
+.velora-producto__pago-svg,
+.velora-producto__pago svg {
+  width: auto !important;
+  height: 28px !important;
+  display: block !important;
+}
+.velora-producto__pago--imagen img {
+  height: 28px !important;
+  width: auto !important;
+  display: block !important;
+  border-radius: 4px !important;
+}
+.velora-producto__confianza {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 18px !important;
+}
+.velora-producto__confianza-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 12px 6px !important;
+  border: 1px solid var(--vp-linea) !important;
+  border-radius: 12px !important;
+  background: var(--vp-niebla) !important;
+  text-align: center !important;
+}
+.velora-producto__confianza-icono {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 999px !important;
+  background: var(--vp-azul) !important;
+  color: #FFFFFF !important;
+  flex-shrink: 0 !important;
+}
+.velora-producto__confianza-icono svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+.velora-producto__confianza-textos {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+  line-height: 1.25 !important;
+}
+.velora-producto__confianza-textos strong {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+.velora-producto__confianza-textos span {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: var(--vp-piedra) !important;
+}
+.velora-producto--js.velora-producto--animado .velora-producto__aparecer {
+  opacity: 0 !important;
+  transform: translateY(14px) !important;
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) !important;
+  transition-delay: calc(var(--d, 0) * 70ms) !important;
+}
+.velora-producto--js.velora-producto--animado .velora-producto__aparecer--visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+@keyframes velora-producto-brillo {
+  0% { left: -60%; }
+  22% { left: 130%; }
+  100% { left: 130%; }
+}
+@keyframes velora-producto-girar {
+  to { transform: rotate(360deg); }
+}
+@keyframes velora-producto-abrir {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@media screen and (max-width: 749px) {
+  .velora-producto--oculto-mobile {
+    display: none !important;
+  }
+  .velora-producto__contenedor {
+    padding: 0 !important;
+  }
+  .velora-producto__pista {
+    border-radius: 0 !important;
+  }
+  .velora-producto__info {
+    padding: 0 16px !important;
+  }
+  .velora-producto__pack-cuerpo {
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .velora-producto__pack-titulo {
+    font-size: 15px !important;
+  }
+  .velora-producto__pack-precio {
+    font-size: 16px !important;
+  }
+  .velora-producto__pack-incluye-lista {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media screen and (min-width: 750px) {
+  .velora-producto__resena {
+    gap: 18px !important;
+    padding: 16px 18px !important;
+  }
+  .velora-producto__resena-foto {
+    width: 84px !important;
+    height: 84px !important;
+  }
+  .velora-producto__resena-titulo {
+    font-size: 16px !important;
+  }
+  .velora-producto--oculto-desktop {
+    display: none !important;
+  }
+  .velora-producto {
+    padding: var(--vp-pt-d) 0 var(--vp-pb-d) !important;
+  }
+  .velora-producto__contenedor {
+    padding: 0 32px !important;
+  }
+  .velora-producto__titulo {
+    font-size: calc((var(--vp-titulo-m) + var(--vp-titulo-d)) / 2) !important;
+  }
+  .velora-producto__confianza-item {
+    flex-direction: row !important;
+    text-align: left !important;
+    padding: 12px !important;
+  }
+}
+@media screen and (min-width: 990px) {
+  .velora-producto__grilla {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr) !important;
+    gap: 56px !important;
+    align-items: start !important;
+  }
+  .velora-producto__galeria {
+    position: sticky !important;
+    top: 100px !important;
+  }
+  .velora-producto__titulo {
+    font-size: var(--vp-titulo-d) !important;
+  }
+  .velora-producto__check {
+    font-size: 16px !important;
+  }
+  .velora-producto__puntos {
+    display: none !important;
+  }
+  .velora-producto__miniaturas {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+  }
+  .velora-producto__miniatura {
+    position: relative !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    padding: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border: 1.5px solid transparent !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background: var(--vp-niebla) !important;
+    cursor: pointer !important;
+    opacity: 0.6 !important;
+    transition: opacity 0.25s ease, border-color 0.25s ease !important;
+  }
+  .velora-producto__miniatura img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .velora-producto__miniatura:hover {
+    opacity: 1 !important;
+  }
+  .velora-producto__miniatura--activa {
+    opacity: 1 !important;
+    border-color: var(--vp-tinta) !important;
+  }
+  .velora-producto__miniatura-play {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #FFFFFF !important;
+    background: rgba(18, 26, 33, 0.25) !important;
+  }
+  .velora-producto__miniatura-play svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .velora-producto__pack-cuerpo {
+    padding: 16px 18px !important;
+    gap: 14px !important;
+  }
+  .velora-producto__pack-titulo {
+    font-size: 17px !important;
+  }
+  .velora-producto__pack-precio {
+    font-size: 19px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .velora-producto *,
+  .velora-producto *::before,
+  .velora-producto *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .velora-producto .velora-producto__aparecer {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .velora-producto__pista {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== Cuotas sin interés ===== */
+.velora-producto__cuotas-banda {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 0 14px !important;
+  padding: 12px 14px !important;
+  border-radius: var(--vp-pack-radio) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--vp-azul) 45%, #061633) 0%, var(--vp-azul) 100%) !important;
+  color: #FFFFFF !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--vp-azul) 25%, transparent) !important;
+}
+.velora-producto__cuotas-banda[hidden], .velora-producto__cuotas-linea[hidden], .velora-producto__pack-cuotas[hidden] {
+  display: none !important;
+}
+.velora-producto__cuotas-banda::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 60px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent) !important;
+  transform: translateX(-120px) skewX(-20deg) !important;
+  animation: velora-producto-cuotas-brillo 3.2s ease-in-out infinite !important;
+  pointer-events: none !important;
+}
+@keyframes velora-producto-cuotas-brillo {
+  0%, 35% { transform: translateX(-120px) skewX(-20deg); }
+  75%, 100% { transform: translateX(560px) skewX(-20deg); }
+}
+.velora-producto__cuotas-icono {
+  flex: 0 0 42px !important;
+  height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+.velora-producto__cuotas-icono svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+.velora-producto__cuotas-textos {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+}
+.velora-producto__cuotas-textos strong {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+.velora-producto__cuotas-textos span {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+.velora-producto__cuotas-fin {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  text-align: center !important;
+}
+.velora-producto__cuotas-fin em {
+  font-style: normal !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  background: var(--vp-tachado) !important;
+  color: #FFFFFF !important;
+  animation: velora-producto-cuotas-late 1.6s ease-in-out infinite !important;
+}
+@keyframes velora-producto-cuotas-late {
+  50% { transform: scale(1.06); }
+}
+.velora-producto__cuotas-fin i {
+  font-style: normal !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.velora-producto__cuotas-fin i:empty {
+  display: none !important;
+}
+.velora-producto__pack-cuotas {
+  display: inline-flex !important;
+  align-items: center !important;
+  align-self: flex-start !important;
+  gap: 5px !important;
+  margin-top: 4px !important;
+  padding: 3px 8px !important;
+  border: 1.5px solid var(--vp-cuotas) !important;
+  border-radius: 8px !important;
+  background: #FFFFFF !important;
+  color: color-mix(in srgb, var(--vp-cuotas) 75%, #000) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  transition: background-color 0.25s ease, color 0.25s ease !important;
+}
+.velora-producto__pack-cuotas svg {
+  flex-shrink: 0 !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+.velora-producto__pack--activo .velora-producto__pack-cuotas {
+  background: var(--vp-cuotas) !important;
+  color: #FFFFFF !important;
+}
+.velora-producto__cuotas-linea {
+  margin: 8px 0 0 !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  color: var(--vp-tinta) !important;
+}
+.velora-producto__cuotas-linea strong {
+  font-weight: 700 !important;
+  color: color-mix(in srgb, var(--vp-cuotas) 75%, #000) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .velora-producto__cuotas-banda::after, .velora-producto__cuotas-fin em { animation: none !important; }
+}
+
+/* ===== VELORA CYBER (estilo claro, acentos violeta) ===== */
+.velora-producto--vpc .velora-producto__slide { position: relative !important; }
+.vpc-insignia { position: absolute !important; left: 12px !important; bottom: 12px !important; z-index: 3 !important; display: inline-flex !important; align-items: center !important; gap: 5px !important; padding: 5px 10px 5px 9px !important; border-radius: 999px !important; background: rgba(255, 255, 255, 0.86) !important; -webkit-backdrop-filter: blur(6px) !important; backdrop-filter: blur(6px) !important; border: 1px solid rgba(91, 75, 214, 0.22) !important; box-shadow: 0 4px 14px rgba(42, 31, 184, 0.16) !important; line-height: 1 !important; pointer-events: none !important; }
+.vpc-insignia[hidden] { display: none !important; }
+.vpc-insignia__v { font: 700 9.5px 'Poppins', sans-serif !important; letter-spacing: 0.14em !important; color: var(--vp-tinta, #0B2A5B) !important; }
+.vpc-insignia__c { font: italic 800 12px 'Poppins', sans-serif !important; letter-spacing: 0.04em !important; background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2) 55%, var(--vpc-3)) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+.vpc-insignia svg { width: 11px !important; height: 11px !important; color: var(--vpc-2) !important; }
+.vpc-mini { position: relative !important; flex: none !important; display: inline-flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; width: 82px !important; padding: 8px 10px 7px !important; border-radius: 12px !important; overflow: hidden !important; line-height: 1 !important; background: linear-gradient(135deg, var(--vpc-1) 0%, var(--vpc-2) 55%, var(--vpc-3) 100%) !important; box-shadow: 0 8px 18px color-mix(in srgb, var(--vpc-2) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important; transform: rotate(-4deg) !important; -webkit-mask: radial-gradient(circle 5px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat !important; mask: radial-gradient(circle 5px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat !important; }
+.vpc-mini::before { content: "" !important; position: absolute !important; inset: 4px 9px !important; border: 1px dashed rgba(255, 255, 255, 0.45) !important; border-radius: 7px !important; pointer-events: none !important; }
+.vpc-mini__brillo { position: absolute !important; top: -30% !important; left: -60% !important; width: 40% !important; height: 160% !important; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent) !important; transform: skewX(-20deg) !important; animation: vpcBrillo 3.4s ease-in-out infinite !important; pointer-events: none !important; }
+@keyframes vpcBrillo { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+.vpc-mini__v { position: relative !important; font: 700 7.5px 'Poppins', sans-serif !important; letter-spacing: 0.24em !important; color: rgba(255, 255, 255, 0.85) !important; margin-left: 0.24em !important; }
+.vpc-mini__c { position: relative !important; display: inline-flex !important; align-items: center !important; gap: 1px !important; margin-top: 3px !important; font: italic 800 14px 'Poppins', sans-serif !important; letter-spacing: 0.01em !important; color: #FFFFFF !important; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15), 0 0 10px rgba(255, 255, 255, 0.35) !important; }
+.vpc-mini__c svg { width: 12px !important; height: 12px !important; color: #FFE81A !important; filter: drop-shadow(0 0 4px rgba(255, 232, 26, 0.8)) !important; }
+.vpc-mini__l { position: relative !important; margin-top: 3px !important; padding: 2px 6px !important; border-radius: 4px !important; background: rgba(255, 255, 255, 0.95) !important; color: var(--vpc-1) !important; font: 800 7.5px 'Poppins', sans-serif !important; letter-spacing: 0.18em !important; }
+@media (prefers-reduced-motion: reduce) { .vpc-mini__brillo { display: none !important; } }
+.vpc-benef { display: flex !important; align-items: center !important; gap: 12px !important; margin: 0 0 12px !important; padding: 12px 14px !important; border-radius: 16px !important; border: 1.5px solid color-mix(in srgb, var(--vpc-1) 28%, transparent) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--vpc-2) 7%, #FFFFFF), color-mix(in srgb, var(--vpc-1) 6%, #FFFFFF)) !important; }
+.vpc-benef[hidden], .vpc-reloj[hidden], .vpc-pill[hidden] { display: none !important; }
+.vpc-benef__txt { display: flex !important; flex-direction: column !important; gap: 2px !important; min-width: 0 !important; }
+.vpc-benef__txt small { font-size: 12px !important; font-weight: 600 !important; color: var(--vpc-2) !important; }
+.vpc-benef__txt strong { font-size: 16px !important; line-height: 1.2 !important; font-weight: 800 !important; color: var(--vpc-1) !important; }
+.vpc-benef__txt em { font-style: normal !important; font-size: 10.5px !important; font-weight: 700 !important; letter-spacing: 0.06em !important; color: var(--vp-piedra, #5B6B82) !important; text-transform: uppercase !important; }
+.vpc-pill { display: inline-block !important; margin-top: 3px !important; padding: 2px 8px !important; border-radius: 999px !important; background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2)) !important; color: #FFFFFF !important; font-size: 10.5px !important; font-weight: 800 !important; letter-spacing: 0.02em !important; white-space: nowrap !important; }
+.vpc-pill--vivo { background: linear-gradient(90deg, var(--vpc-1), var(--vpc-3)) !important; }
+.vpc-reloj { margin: 14px 0 0 !important; padding: 12px 14px !important; border-radius: 16px !important; border: 1.5px solid color-mix(in srgb, var(--vpc-1) 28%, transparent) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--vpc-2) 7%, #FFFFFF), color-mix(in srgb, var(--vpc-1) 6%, #FFFFFF)) !important; }
+.vpc-reloj__fila { display: flex !important; align-items: center !important; gap: 12px !important; }
+.vpc-reloj__txt { flex: 1 !important; margin: 0 !important; font-size: 13.5px !important; line-height: 1.25 !important; font-weight: 700 !important; color: var(--vpc-1) !important; }
+.vpc-reloj__nums { display: flex !important; gap: 10px !important; }
+.vpc-reloj__nums span { display: flex !important; flex-direction: column !important; align-items: center !important; min-width: 30px !important; }
+.vpc-reloj__nums b { font-size: 24px !important; line-height: 1 !important; font-weight: 800 !important; font-style: italic !important; font-variant-numeric: tabular-nums !important; background: linear-gradient(180deg, var(--vpc-1), var(--vpc-3)) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+.vpc-reloj__nums small { margin-top: 3px !important; font-size: 10px !important; color: var(--vp-piedra, #7A8699) !important; }
+.vpc-reloj__ahorro { display: flex !important; align-items: baseline !important; justify-content: center !important; gap: 6px !important; flex-wrap: wrap !important; margin: 10px 0 0 !important; padding: 8px 10px !important; border-radius: 10px !important; background: #FFFFFF !important; border: 1px solid color-mix(in srgb, var(--vpc-2) 25%, transparent) !important; font-size: 13px !important; font-weight: 600 !important; color: var(--vp-tinta, #0B2A5B) !important; text-align: center !important; }
+.vpc-reloj__ahorro[hidden] { display: none !important; }
+.vpc-reloj__ahorro-ref { font-size: 12px !important; font-weight: 500 !important; color: #E04A4A !important; text-decoration: line-through !important; }
+.vpc-reloj__ahorro strong { font-size: 17px !important; font-weight: 800 !important; background: linear-gradient(90deg, var(--vpc-1), var(--vpc-3)) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+.vpc-reloj__pie { margin: 10px 0 0 !important; padding-top: 9px !important; border-top: 1px solid color-mix(in srgb, var(--vpc-1) 18%, transparent) !important; text-align: center !important; font-size: 11.5px !important; font-weight: 800 !important; letter-spacing: 0.07em !important; color: var(--vpc-1) !important; text-transform: uppercase !important; }
+.vpc-reloj__pie b { color: var(--vpc-3) !important; }
+@media screen and (max-width: 380px) { .vpc-reloj__nums b { font-size: 20px !important; } .vpc-reloj__nums { gap: 7px !important; } }
+
+.vpc-logo { flex: none !important; display: block !important; width: 92px !important; height: auto !important; filter: drop-shadow(0 6px 12px rgba(60, 20, 160, 0.28)) !important; }
+.vpc-insignia-logo { position: absolute !important; left: 8px !important; bottom: 8px !important; z-index: 3 !important; width: 104px !important; height: auto !important; filter: drop-shadow(0 6px 14px rgba(42, 31, 184, 0.35)) !important; pointer-events: none !important; }
+.vpc-insignia-logo[hidden] { display: none !important; }
+.vpc-vivo { display: inline-flex !important; align-self: flex-start !important; align-items: center !important; gap: 8px !important; margin: 0 0 10px !important; padding: 6px 14px 6px 11px !important; border-radius: 999px !important; background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; color: #FFFFFF !important; font: 700 11.5px/1 'Poppins', sans-serif !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; box-shadow: 0 6px 16px color-mix(in srgb, var(--vpc-2) 35%, transparent) !important; }
+.vpc-vivo[hidden], .vpc-dias[hidden], .vpc-dia[hidden] { display: none !important; }
+.vpc-vivo__punto { position: relative !important; flex: none !important; width: 8px !important; height: 8px !important; border-radius: 999px !important; background: #2EE68A !important; }
+.vpc-vivo__punto::after { content: "" !important; position: absolute !important; inset: -4px !important; border-radius: 999px !important; background: #2EE68A !important; animation: vpcVivo 1.6s ease-out infinite !important; }
+@keyframes vpcVivo { 0% { opacity: 0.55; transform: scale(0.5); } 80%, 100% { opacity: 0; transform: scale(1.7); } }
+.vpc-dias { list-style: none !important; display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; margin: 14px 0 0 !important; padding: 0 !important; }
+.vpc-dia { position: relative !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 4px !important; padding: 9px 4px 8px !important; border-radius: 12px !important; border: 1.5px solid color-mix(in srgb, var(--vpc-1) 22%, var(--vp-linea)) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--vpc-2) 6%, #FFFFFF), color-mix(in srgb, var(--vpc-1) 5%, #FFFFFF)) !important; text-align: center !important; transition: transform 0.3s ease, background-color 0.3s ease !important; }
+.vpc-dia small { font: 700 10px/1 'Poppins', sans-serif !important; letter-spacing: 0.06em !important; color: var(--vp-piedra) !important; white-space: nowrap !important; }
+.vpc-dia b { position: relative !important; font: italic 800 21px/1 'Poppins', sans-serif !important; letter-spacing: -0.01em !important; color: var(--vpc-1) !important; }
+.vpc-dia--hoy { border-color: #F2C200 !important; background: #FFE81A !important; transform: translateY(-2px) !important; box-shadow: 0 8px 18px rgba(242, 194, 0, 0.35) !important; }
+.vpc-dia--hoy small, .vpc-dia--hoy b { color: var(--vp-tinta) !important; }
+.vpc-dia--pasado { background: var(--vp-niebla) !important; border-color: var(--vp-linea) !important; }
+.vpc-dia--pasado small, .vpc-dia--pasado b { color: color-mix(in srgb, var(--vp-piedra) 70%, #FFFFFF) !important; }
+.vpc-dia--pasado b::after { content: "" !important; position: absolute !important; left: -5px !important; right: -5px !important; top: 50% !important; height: 2.5px !important; border-radius: 2px !important; background: #E53935 !important; transform: rotate(-12deg) !important; }
+@media screen and (max-width: 380px) { .vpc-dias { gap: 6px !important; } .vpc-dia b { font-size: 18px !important; } .vpc-dia small { font-size: 9px !important; } }
+@media (prefers-reduced-motion: reduce) { .vpc-vivo__punto::after { animation: none !important; } }
+.velora-producto--vpc .velora-producto__pack-insignia { background: linear-gradient(90deg, var(--vpc-1), var(--vpc-2)) !important; color: #FFFFFF !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--vpc-2) 35%, transparent) !important; }
+.velora-producto--vpc .velora-producto__pack--activo .velora-producto__pack-insignia { background: linear-gradient(90deg, var(--vpc-1), var(--vpc-3)) !important; }
+.velora-producto--vpc .velora-producto__check-icono { background: linear-gradient(135deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--vpc-2) 32%, transparent) !important; }
+.velora-producto--vpc .velora-producto__confianza-icono { background: linear-gradient(135deg, var(--vpc-1), var(--vpc-2) 60%, var(--vpc-3)) !important; }
+@media screen and (max-width: 380px) { .vpc-logo { width: 80px !important; } }
+{% endstylesheet %}
+
+{% javascript %}
+if (!customElements.get('velora-producto')) {
+  customElements.define('velora-producto', class extends HTMLElement {
+    connectedCallback() {
+      this.classList.add('velora-producto--js');
+      this.formulario = this.querySelector('[data-formulario]');
+      this.idInput = this.querySelector('[data-id]');
+      this.cantidadInput = this.querySelector('[data-cantidad]');
+      this.boton = this.querySelector('[data-boton]');
+      this.botonTexto = this.querySelector('[data-boton-texto]');
+      this.botonPrecio = this.querySelector('[data-boton-precio]');
+      this.error = this.querySelector('[data-error]');
+      this.ahorroCaja = this.querySelector('[data-ahorro-caja]');
+      this.ahorroMonto = this.querySelector('[data-ahorro-monto]');
+      this.iniciarCuotas();
+      this.querySelectorAll('[data-pack-input]').forEach((i) => i.addEventListener('change', () => this.seleccionar(i)));
+      const marcado = this.querySelector('[data-pack-input]:checked');
+      if (marcado) this.seleccionar(marcado);
+      if (this.formulario) this.formulario.addEventListener('submit', (e) => this.agregar(e));
+      this.alBloque = (e) => {
+        const pack = e.target && e.target.closest ? e.target.closest('[data-pack]') : null;
+        if (!pack || !this.contains(pack)) return;
+        const input = pack.querySelector('[data-pack-input]');
+        if (input) {
+          input.checked = true;
+          this.seleccionar(input);
+        }
+      };
+      document.addEventListener('shopify:block:select', this.alBloque);
+      this.iniciarGaleria();
+      this.iniciarAparicion();
+    }
+    disconnectedCallback() {
+      clearInterval(this.relojCuotas);
+      document.removeEventListener('shopify:block:select', this.alBloque);
+      if (this.observador) this.observador.disconnect();
+    }
+    iniciarCuotas() {
+      const fin = (this.dataset.cuotasFin || '').trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fin)) return;
+      const p = fin.split('-').map(Number);
+      /* Termina a las 23:59:59 hora Argentina (UTC-3) */
+      const limite = Date.UTC(p[0], p[1] - 1, p[2] + 1, 3, 0, 0);
+      const relojes = this.querySelectorAll('[data-vp-cuotas-reloj]');
+      const tic = () => {
+        const ms = limite - Date.now();
+        if (ms <= 0) {
+          this.cuotasVencidas = true;
+          this.querySelectorAll('[data-vp-cuotas]').forEach((el) => { el.hidden = true; });
+          clearInterval(this.relojCuotas);
+          return;
+        }
+        const d = Math.floor(ms / 86400000);
+        const h = Math.floor((ms % 86400000) / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const sg = Math.floor((ms % 60000) / 1000);
+        const dd = (n) => String(n).padStart(2, '0');
+        const texto = d > 0 ? d + 'd ' + dd(h) + 'h ' + dd(m) + 'm' : dd(h) + 'h ' + dd(m) + 'm ' + dd(sg) + 's';
+        relojes.forEach((r) => { r.textContent = 'Termina en ' + texto; });
+      };
+      tic();
+      if (!this.cuotasVencidas) this.relojCuotas = setInterval(tic, 1000);
+    }
+    seleccionar(input) {
+      this.querySelectorAll('[data-pack]').forEach((p) => p.classList.toggle('velora-producto__pack--activo', p.contains(input)));
+      if (this.idInput) this.idInput.value = input.dataset.variante;
+      if (this.cantidadInput) this.cantidadInput.value = input.dataset.cantidad;
+      if (this.botonPrecio) this.botonPrecio.textContent = input.dataset.precio;
+      const lineaCuotas = this.querySelector('[data-cuotas-linea]');
+      if (lineaCuotas && !this.cuotasVencidas) {
+        const cuota = input.dataset.cuota || '';
+        lineaCuotas.hidden = !cuota;
+        const fuerte = lineaCuotas.querySelector('strong');
+        if (fuerte && cuota) fuerte.textContent = (lineaCuotas.dataset.plantilla || '').replace('[n]', input.dataset.cuotas).replace('[monto]', cuota);
+      }
+      if (this.ahorroCaja) {
+        const ahorro = input.dataset.ahorro || '';
+        this.ahorroCaja.hidden = !ahorro;
+        if (this.ahorroMonto) this.ahorroMonto.textContent = ahorro;
+        this.ahorroCaja.classList.remove('velora-producto__ahorro--cambio');
+        void this.ahorroCaja.offsetWidth;
+        if (ahorro) this.ahorroCaja.classList.add('velora-producto__ahorro--cambio');
+      }
+      const disponible = input.dataset.disponible === 'true';
+      if (this.boton) this.boton.disabled = !disponible;
+      if (this.botonTexto) this.botonTexto.textContent = disponible ? this.dataset.boton : this.dataset.agotado;
+      if (this.error) this.error.hidden = true;
+    }
+    mostrarError(mensaje) {
+      if (!this.error) return;
+      this.error.textContent = mensaje || this.dataset.errorGenerico;
+      this.error.hidden = false;
+    }
+    agregar(e) {
+      e.preventDefault();
+      if (!this.boton || this.boton.disabled || this.boton.classList.contains('velora-producto__boton--cargando')) return;
+      this.boton.classList.add('velora-producto__boton--cargando');
+      this.boton.setAttribute('aria-busy', 'true');
+      const raiz = window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/';
+      const marcado = this.querySelector('[data-pack-input]:checked');
+      const regalo = marcado ? marcado.dataset.regalo || '' : '';
+      const varianteId = this.idInput ? this.idInput.value : '';
+      let datos = new FormData(this.formulario);
+      if (regalo) {
+        datos = new FormData();
+        datos.append('items[0][id]', varianteId);
+        datos.append('items[0][quantity]', this.cantidadInput ? this.cantidadInput.value : '1');
+        datos.append('items[1][id]', regalo);
+        datos.append('items[1][quantity]', '1');
+        datos.append('items[1][properties][_regalo]', 'Incluido con tu pack');
+      }
+      const cajon = document.querySelector('cart-drawer');
+      const usarCajon = this.dataset.modo === 'carrito' && cajon && typeof cajon.renderContents === 'function' && typeof cajon.getSectionsToRender === 'function';
+      if (usarCajon) {
+        datos.append('sections', cajon.getSectionsToRender().map((x) => x.id));
+        datos.append('sections_url', window.location.pathname);
+      }
+      fetch(raiz + 'cart/add.js', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/javascript' },
+        body: datos
+      })
+        .then((r) => r.json())
+        .then((respuesta) => {
+          if (respuesta.status) {
+            this.mostrarError(respuesta.description || respuesta.message);
+            return;
+          }
+          if (this.dataset.modo === 'checkout') {
+            window.location.href = raiz + 'checkout';
+            return;
+          }
+          if (typeof publish === 'function' && typeof PUB_SUB_EVENTS !== 'undefined') {
+            publish(PUB_SUB_EVENTS.cartUpdate, { source: 'velora-producto', productVariantId: varianteId, cartData: respuesta });
+          }
+          if (usarCajon) {
+            try {
+              cajon.classList.remove('is-empty');
+              cajon.renderContents(respuesta);
+            } catch (err) {
+              window.location.href = raiz + 'cart';
+            }
+            return;
+          }
+          window.location.href = raiz + 'cart';
+        })
+        .catch(() => this.mostrarError())
+        .finally(() => {
+          this.boton.classList.remove('velora-producto__boton--cargando');
+          this.boton.removeAttribute('aria-busy');
+        });
+    }
+    iniciarGaleria() {
+      const pista = this.querySelector('[data-pista]');
+      if (!pista) return;
+      const miniaturas = Array.from(this.querySelectorAll('[data-miniatura]'));
+      const puntos = Array.from(this.querySelectorAll('[data-punto]'));
+      const marcar = (n) => {
+        miniaturas.forEach((m, i) => m.classList.toggle('velora-producto__miniatura--activa', i === n));
+        puntos.forEach((p, i) => p.classList.toggle('velora-producto__punto--activo', i === n));
+      };
+      const ir = (n) => pista.scrollTo({ left: n * pista.clientWidth });
+      miniaturas.forEach((m, i) => m.addEventListener('click', () => ir(i)));
+      puntos.forEach((p, i) => p.addEventListener('click', () => ir(i)));
+      let espera = false;
+      pista.addEventListener('scroll', () => {
+        if (espera) return;
+        espera = true;
+        requestAnimationFrame(() => {
+          marcar(Math.round(pista.scrollLeft / Math.max(pista.clientWidth, 1)));
+          espera = false;
+        });
+      }, { passive: true });
+    }
+    iniciarAparicion() {
+      const elementos = this.querySelectorAll('.velora-producto__aparecer');
+      const reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!('IntersectionObserver' in window) || reducido) {
+        elementos.forEach((el) => el.classList.add('velora-producto__aparecer--visible'));
+        return;
+      }
+      this.observador = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+          if (entrada.isIntersecting) {
+            entrada.target.classList.add('velora-producto__aparecer--visible');
+            this.observador.unobserve(entrada.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      elementos.forEach((el) => this.observador.observe(el));
+    }
+  });
+}
+if (!customElements.get('velora-producto-resenas')) {
+  customElements.define('velora-producto-resenas', class extends HTMLElement {
+    connectedCallback() {
+      this.tarjetas = Array.from(this.querySelectorAll('[data-resena]'));
+      this.puntos = Array.from(this.querySelectorAll('[data-ir]'));
+      this.actual = 0;
+      if (this.tarjetas.length < 2) return;
+      this.reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.alClick = (e) => {
+        const punto = e.target.closest('[data-ir]');
+        if (!punto) return;
+        this.mostrar(parseInt(punto.dataset.ir, 10) || 0);
+        this.reiniciar();
+      };
+      this.addEventListener('click', this.alClick);
+      this.pista = this.querySelector('.velora-producto__resenas-pista');
+      this.classList.add('velora-producto__resenas--deslizable');
+      this.alTocar = (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        this.inicioX = e.clientX;
+        this.inicioY = e.clientY;
+        this.dx = 0;
+        this.tocando = true;
+        this.arrastrando = false;
+        this.pausado = true;
+        try { this.pista.setPointerCapture(e.pointerId); } catch (err) {}
+      };
+      this.alMover = (e) => {
+        if (!this.tocando) return;
+        const dx = e.clientX - this.inicioX;
+        const dy = e.clientY - this.inicioY;
+        if (!this.arrastrando) {
+          if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+            this.tocando = false;
+            return;
+          }
+          if (Math.abs(dx) < 8) return;
+          this.arrastrando = true;
+          this.classList.add('velora-producto__resenas--arrastrando');
+        }
+        this.dx = dx;
+        this.tarjetas[this.actual].style.setProperty('--vp-arrastre', dx + 'px');
+      };
+      this.alSoltar = () => {
+        const dx = this.arrastrando ? this.dx : 0;
+        const deslizo = this.arrastrando;
+        this.tocando = false;
+        this.arrastrando = false;
+        this.classList.remove('velora-producto__resenas--arrastrando');
+        this.tarjetas.forEach((t) => t.style.removeProperty('--vp-arrastre'));
+        if (deslizo) {
+          const total = this.tarjetas.length;
+          if (dx <= -40) this.mostrar((this.actual + 1) % total);
+          else if (dx >= 40) this.mostrar((this.actual - 1 + total) % total);
+          this.reiniciar();
+        }
+        this.pausado = this.matches(':hover');
+      };
+      this.pista.addEventListener('pointerdown', this.alTocar);
+      this.pista.addEventListener('pointermove', this.alMover);
+      this.pista.addEventListener('pointerup', this.alSoltar);
+      this.pista.addEventListener('pointercancel', this.alSoltar);
+      this.pausar = () => { this.pausado = true; };
+      this.seguir = () => { this.pausado = false; };
+      this.addEventListener('mouseenter', this.pausar);
+      this.addEventListener('mouseleave', this.seguir);
+      this.addEventListener('focusin', this.pausar);
+      this.addEventListener('focusout', this.seguir);
+      this.alElegir = (e) => {
+        const i = this.tarjetas.indexOf(e.target);
+        if (i < 0) return;
+        this.pausado = true;
+        this.mostrar(i);
+      };
+      this.alSoltarBloque = (e) => {
+        if (this.tarjetas.indexOf(e.target) >= 0) this.pausado = false;
+      };
+      document.addEventListener('shopify:block:select', this.alElegir);
+      document.addEventListener('shopify:block:deselect', this.alSoltarBloque);
+      if (this.reducido) return;
+      if ('IntersectionObserver' in window) {
+        this.obs = new IntersectionObserver((entradas) => {
+          this.visible = entradas[0].isIntersecting;
+          if (this.visible) this.reiniciar();
+          else clearInterval(this.reloj);
+        }, { threshold: 0.3 });
+        this.obs.observe(this);
+      } else {
+        this.visible = true;
+        this.reiniciar();
+      }
+    }
+    disconnectedCallback() {
+      clearInterval(this.reloj);
+      if (this.obs) this.obs.disconnect();
+      if (this.alClick) this.removeEventListener('click', this.alClick);
+      document.removeEventListener('shopify:block:select', this.alElegir);
+      document.removeEventListener('shopify:block:deselect', this.alSoltarBloque);
+    }
+    reiniciar() {
+      clearInterval(this.reloj);
+      if (this.reducido || !this.visible) return;
+      const segundos = Math.max(parseFloat(this.dataset.intervalo) || 6, 2);
+      this.reloj = setInterval(() => {
+        if (!this.pausado) this.mostrar((this.actual + 1) % this.tarjetas.length);
+      }, segundos * 1000);
+    }
+    mostrar(i) {
+      this.actual = i;
+      this.tarjetas.forEach((t, n) => t.classList.toggle('velora-producto__resena--activa', n === i));
+      this.puntos.forEach((p, n) => {
+        p.classList.toggle('velora-producto__resenas-punto--activo', n === i);
+        p.setAttribute('aria-selected', n === i ? 'true' : 'false');
+      });
+    }
+  });
+}
+
+(function () {
+  /* VELORA CYBER · Pre-Cyber (% Pre + ??) y del día 1 al 4 el % de cada día. Fecha y % van cifrados. */
+  var DIA = 864e5, ART = 3 * 36e5;
+  function iniciar(el) {
+    if (!el.dataset.cyberK || el.dataset.vpcListo) return;
+    el.dataset.vpcListo = '1';
+    var d = el.dataset, datos;
+    try { datos = JSON.parse(decodeURIComponent(escape(window.atob(d.cyberK)))); } catch (err) { return; }
+    var q = function (a) { return el.querySelector(a); }, qa = function (a) { return el.querySelectorAll(a); };
+    var partes = (datos.i || '').split('-');
+    var inicio = Date.UTC(+partes[0], (+partes[1] || 1) - 1, +partes[2] || 1);
+    var pct = (datos.p || []).map(function (x) { return +x || 0; });
+    var ult = pct.length - 1;
+    var pre = d.cyberPre === 'true', prePct = +d.cyberPrePct || 0;
+    var sinDec = d.cyberSinDecimales === 'true';
+    var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var dinero = function (c) { return '$' + Math.round(c / 100).toLocaleString('es-AR') + (sinDec ? '' : ',00'); };
+    var t = function (x, o) { return String(x || '').split('[pre]').join(prePct).split('[p]').join(o.p).split('[n]').join(o.n); };
+    var esc = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var estado = function () {
+      var dia = Math.floor((Date.now() - ART - inicio) / DIA);
+      if (isNaN(dia)) return { fase: 'fin', dia: 0, p: 0 };
+      if (dia < 0) return pre ? { fase: 'pre', dia: dia, p: prePct, objetivo: inicio + ART } : { fase: 'previo', dia: dia, p: 0, objetivo: inicio + ART };
+      if (dia > ult) return { fase: 'fin', dia: dia, p: 0 };
+      return { fase: 'vivo', dia: dia, p: pct[dia], n: dia < ult ? pct[dia + 1] : 0, objetivo: inicio + (dia + 1) * DIA + ART };
+    };
+    el.veloraCyber = { estado: estado, pre: pre, prePct: prePct };
+    var revelado = false;
+    var revelar = function () {
+      if (revelado) return;
+      revelado = true;
+      el.dataset.cyberInicio = datos.i;
+      pct.forEach(function (x, k) { el.dataset['cyberP' + (k + 1)] = x; });
+    };
+    var e = estado();
+    var precios = function () {
+      var p = (e.fase === 'vivo' || e.fase === 'pre') ? e.p : 0;
+      qa('[data-pack-input]').forEach(function (input) {
+        var pack = input.closest('[data-pack]');
+        if (!pack) return;
+        var precioEl = pack.querySelector('[data-vpc-precio]'), unidadEl = pack.querySelector('[data-vpc-unidad]'), tachEl = pack.querySelector('[data-vpc-tachado]'), pill = pack.querySelector('[data-vpc-pill]');
+        if (!input.dataset.vpcOrig) {
+          input.dataset.vpcOrig = '1';
+          input.dataset.vpcOrigPrecio = input.dataset.precio || '';
+          input.dataset.vpcOrigAhorro = input.dataset.ahorro || '';
+          if (unidadEl) unidadEl.dataset.vpcOrig = unidadEl.textContent;
+          if (tachEl) { tachEl.dataset.vpcOrig = tachEl.textContent; tachEl.dataset.vpcOculto = tachEl.hidden ? '1' : '0'; }
+        }
+        var aplica = p > 0 && input.dataset.cyber !== '0';
+        if (aplica) {
+          var total = +input.dataset.total || 0, comp = +input.dataset.comparado || 0, uds = +input.dataset.unidades || 1;
+          var hoy = Math.round(total * (1 - p / 100) / 100) * 100;
+          var ref = comp > total ? comp : total;
+          input.dataset.precio = dinero(hoy);
+          input.dataset.ahorro = ref > hoy ? dinero(ref - hoy) : '';
+          if (precioEl) precioEl.textContent = dinero(hoy);
+          if (unidadEl) unidadEl.textContent = (d.cyberTxtUnidad || '[precio]').split('[precio]').join(dinero(hoy / uds));
+          if (tachEl) { tachEl.textContent = dinero(ref); tachEl.hidden = false; }
+          if (pill) { pill.textContent = t(e.fase === 'vivo' ? d.vpcPillVivo : d.vpcPillPre, { p: p, n: 0 }); pill.classList.toggle('vpc-pill--vivo', e.fase === 'vivo'); pill.hidden = false; }
+        } else {
+          input.dataset.precio = input.dataset.vpcOrigPrecio;
+          input.dataset.ahorro = input.dataset.vpcOrigAhorro;
+          if (precioEl) precioEl.textContent = input.dataset.vpcOrigPrecio;
+          if (unidadEl && unidadEl.dataset.vpcOrig) unidadEl.textContent = unidadEl.dataset.vpcOrig;
+          if (tachEl) { tachEl.textContent = tachEl.dataset.vpcOrig || ''; tachEl.hidden = tachEl.dataset.vpcOculto === '1'; }
+          if (pill) pill.hidden = true;
+        }
+      });
+      var marcado = q('[data-pack-input]:checked');
+      if (marcado && typeof el.seleccionar === 'function') el.seleccionar(marcado);
+      ahorroHoy();
+    };
+    var ahorroHoy = function () {
+      var caja = q('[data-vpc-hoyahorro]'), m = q('[data-vpc-ahorro-m]'), tx = q('[data-vpc-ahorro-t]');
+      if (!caja) return;
+      var input = q('[data-pack-input]:checked');
+      var p = (e.fase === 'vivo' || e.fase === 'pre') ? e.p : 0;
+      if (!input || !p) { caja.hidden = true; return; }
+      var total = +input.dataset.total || 0, comp = +input.dataset.comparado || 0;
+      var hoy = input.dataset.cyber === '0' ? total : Math.round(total * (1 - p / 100) / 100) * 100;
+      /* Ahorro contra el precio tachado (el mismo que se ve en el pack / Shopify) */
+      var ref = comp > total ? comp : total;
+      if (ref - hoy <= 0) { caja.hidden = true; return; }
+      if (tx) tx.textContent = t(d.vpcAhorroTxt, { p: e.fase === 'pre' ? prePct : p, n: 0 });
+      if (m) m.textContent = dinero(ref - hoy);
+      var refEl = q('[data-vpc-ahorro-ref]');
+      if (refEl) refEl.textContent = dinero(ref);
+      caja.hidden = false;
+    };
+    qa('[data-pack-input]').forEach(function (i) { i.addEventListener('change', function () { ahorroHoy(); }); });
+    var pintar = function () {
+      e = estado();
+      if (e.fase !== 'pre') revelar();
+      var o = { p: e.p, n: e.n || 0 };
+      var benef = q('[data-vpc-benef]'), bt = q('[data-vpc-benef-t]'), bb = q('[data-vpc-benef-b]');
+      var reloj = q('[data-vpc-reloj]'), rt = q('[data-vpc-reloj-t]'), pie = q('[data-vpc-reloj-pie]');
+      var ins = q('[data-vpc-insignia]');
+      if (ins) ins.hidden = e.fase === 'fin';
+      var vivo = q('[data-vpc-vivo]'), vivoT = q('[data-vpc-vivo-t]'), dias = q('[data-vpc-dias]');
+      if (vivo) {
+        vivo.hidden = e.fase !== 'vivo';
+        if (vivoT && e.fase === 'vivo') vivoT.textContent = String(d.vpcVivoTxt || '').split('[d]').join(e.dia + 1).split('[t]').join(pct.length);
+      }
+      if (dias) {
+        dias.hidden = e.fase !== 'vivo';
+        if (e.fase === 'vivo') qa('[data-vpc-dia]').forEach(function (c) {
+          var k = +c.dataset.vpcDia, et = c.querySelector('[data-vpc-dia-e]'), pp = c.querySelector('[data-vpc-dia-p]');
+          if (k > ult) { c.hidden = true; return; }
+          if (et) et.textContent = (datos.e || [])[k] || '';
+          if (pp) pp.textContent = pct[k] + '%';
+          c.classList.toggle('vpc-dia--pasado', k < e.dia);
+          c.classList.toggle('vpc-dia--hoy', k === e.dia);
+          if (k === e.dia) c.setAttribute('aria-current', 'date'); else c.removeAttribute('aria-current');
+        });
+      }
+      if (e.fase === 'pre') {
+        if (benef) { benef.hidden = !prePct; if (bt) bt.textContent = t(d.vpcBenefPre, o); if (bb) bb.textContent = d.vpcBenefPreBajada || ''; }
+        if (reloj) { reloj.hidden = false; if (rt) rt.textContent = d.vpcRelojPre || ''; if (pie) pie.textContent = d.vpcRelojPrePie || ''; }
+        ['días', 'hs', 'min'].forEach(function (l, i) { var x = q('[data-vpc-l' + (i + 1) + ']'); if (x) x.textContent = l; });
+      } else if (e.fase === 'vivo') {
+        if (benef) { benef.hidden = false; if (bt) bt.textContent = t(d.vpcBenefVivo, o); if (bb) bb.textContent = t(e.dia < ult ? d.vpcBenefManana : d.vpcBenefUltimo, o); }
+        if (reloj) {
+          reloj.hidden = false;
+          if (rt) rt.textContent = t(d.vpcRelojVivo, o);
+          if (pie) pie.innerHTML = (datos.e || []).map(function (lab, k) { var dia = esc(String(lab).split(' ')[0]) + ' ' + pct[k] + '%'; return k === e.dia ? '<b>' + dia + '</b>' : dia; }).join(' · ');
+        }
+        ['hs', 'min', 'seg'].forEach(function (l, i) { var x = q('[data-vpc-l' + (i + 1) + ']'); if (x) x.textContent = l; });
+      } else {
+        if (benef) benef.hidden = true;
+        if (reloj) reloj.hidden = true;
+      }
+      precios();
+    };
+    var dos = function (n) { return n < 10 ? '0' + n : '' + n; };
+    var azar = function () { return reducido ? '??' : [0, 1].map(function () { return Math.random() < 0.25 ? String(Math.floor(Math.random() * 10)) : '?'; }).join(''); };
+    var tic = function () {
+      var n1 = q('[data-vpc-n1]'), n2 = q('[data-vpc-n2]'), n3 = q('[data-vpc-n3]');
+      if (e.objetivo && Date.now() >= e.objetivo) { pintar(); }
+      if (!n1) return;
+      if (e.fase === 'pre') { n1.textContent = azar(); n2.textContent = azar(); n3.textContent = azar(); return; }
+      if (e.fase !== 'vivo') return;
+      var r = Math.max(0, Math.floor((e.objetivo - Date.now()) / 1000));
+      n1.textContent = dos(Math.floor(r / 3600)); n2.textContent = dos(Math.floor(r % 3600 / 60)); n3.textContent = dos(r % 60);
+    };
+    pintar();
+    tic();
+    setInterval(tic, e.fase === 'pre' ? 160 : 1000);
+    setInterval(pintar, 60000);
+  }
+  function todos() { document.querySelectorAll('velora-producto[data-cyber-k]').forEach(iniciar); }
+  if (document.readyState !== 'loading') todos(); else document.addEventListener('DOMContentLoaded', todos);
+  document.addEventListener('shopify:section:load', todos);
+})();
+{% endjavascript %}
+
+{%- comment -%} Contador Cyber v2: cápsula + barra del día {%- endcomment -%}
+<style id="vpc-reloj-v2">
+.vpc-reloj .vpc-reloj__fila{align-items:center}
+.vpc-reloj .vpc-reloj__nums{position:relative;display:flex;align-items:center;gap:0;margin-left:auto;margin-bottom:14px;padding:7px 16px 7px 40px;border-radius:999px;background:linear-gradient(90deg,var(--vpc-1,#3b2bd9),var(--vpc-3,#c2309a));box-shadow:0 6px 16px rgba(107,61,245,.3);flex:0 0 auto}
+.vpc-reloj .vpc-reloj__nums::before{content:"";position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='13' r='8'/%3E%3Cpath d='M12 9v4l2.5 2M9 2h6'/%3E%3C/svg%3E") center/contain no-repeat}
+.vpc-reloj .vpc-reloj__nums>span{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 9px}
+.vpc-reloj .vpc-reloj__nums>span:not(:last-child)::after{content:":";position:absolute;right:-3px;top:50%;transform:translateY(-55%);color:rgba(255,255,255,.6);font-weight:800;font-size:20px}
+.vpc-reloj .vpc-reloj__nums b{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#fff!important;color:#fff!important;font-style:normal!important;font-weight:800;font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;min-width:30px;text-align:center}
+.vpc-reloj .vpc-reloj__nums small{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#6b6f7b!important;-webkit-text-fill-color:#6b6f7b!important;white-space:nowrap}
+.vpc-barra{margin:12px 0 12px}
+.vpc-barra__track{height:8px;border-radius:5px;background:#e4dcfb;overflow:hidden}
+.vpc-barra__fill{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--vpc-1,#3b2bd9),var(--vpc-3,#c2309a));transition:width .6s ease}
+.vpc-barra__pie{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-size:11px;font-weight:500;color:#8a8d96}
+.vpc-barra__pie b{color:var(--vpc-3,#c2309a);font-weight:700}
+@media (max-width:480px){.vpc-reloj .vpc-reloj__fila{flex-wrap:wrap}.vpc-reloj .vpc-reloj__txt{flex:1 1 auto;min-width:0}.vpc-reloj .vpc-reloj__nums{flex:0 0 100%;justify-content:center;margin:10px 0 18px!important}.vpc-reloj .vpc-reloj__nums{padding:6px 10px 6px 32px}.vpc-reloj .vpc-reloj__nums::before{left:11px;width:15px;height:15px}.vpc-reloj .vpc-reloj__nums>span{padding:0 6px}.vpc-reloj .vpc-reloj__nums b{font-size:19px;min-width:24px}.vpc-reloj .vpc-reloj__nums>span:not(:last-child)::after{font-size:16px;right:-2px}}
+</style>
+<script>
+(function(){
+  var SIG = {1:'Mañana baja a 20%',2:'Mañana baja a 15%',3:'Mañana baja a 10%',4:'Mañana vuelven los precios normales'};
+  function ar(){ var d = new Date(Date.now() - 3*3600e3); return d; }
+  function poner(){
+    document.querySelectorAll('[data-vpc-reloj]').forEach(function(r){
+      var b = r.querySelector('.vpc-barra');
+      if (!b){
+        b = document.createElement('div'); b.className = 'vpc-barra';
+        b.innerHTML = '<div class="vpc-barra__track"><span class="vpc-barra__fill"></span></div><div class="vpc-barra__pie"><span class="vpc-barra__pas"></span><b class="vpc-barra__sig"></b></div>';
+        var ah = r.querySelector('.vpc-reloj__ahorro'); r.insertBefore(b, ah || null);
+      }
+      var d = ar(), seg = d.getUTCHours()*3600 + d.getUTCMinutes()*60 + d.getUTCSeconds(), pct = Math.min(100, seg/864);
+      b.querySelector('.vpc-barra__fill').style.width = pct.toFixed(1) + '%';
+      b.querySelector('.vpc-barra__pas').textContent = 'Ya pasó el ' + Math.floor(pct) + '% del día';
+      var dow = d.getUTCDay(); b.querySelector('.vpc-barra__sig').textContent = SIG[dow] || '';
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poner); else poner();
+  setInterval(poner, 30000);
+  document.addEventListener('shopify:section:load', poner);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Velora · Producto",
+  "tag": "section",
+  "class": "velora-producto-seccion",
+  "max_blocks": 30,
+  "settings": [
+    { "type": "header", "content": "Producto y galería" },
+    { "type": "product", "id": "producto", "label": "Producto", "info": "En la plantilla de producto se usa el producto de la página si lo dejás vacío." },
+    { "type": "video", "id": "video", "label": "Video principal (va primero en la galería)" },
+    { "type": "checkbox", "id": "mostrar_miniaturas", "label": "Mostrar miniaturas en desktop", "default": true },
+    {
+      "type": "select",
+      "id": "relacion_imagen",
+      "label": "Formato de la galería",
+      "options": [
+        { "value": "1 / 1", "label": "Cuadrado" },
+        { "value": "4 / 5", "label": "Vertical 4:5" },
+        { "value": "3 / 4", "label": "Vertical 3:4" }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "ajuste_imagen",
+      "label": "Ajuste de las imágenes",
+      "options": [
+        { "value": "cover", "label": "Llenar" },
+        { "value": "contain", "label": "Ver completa" }
+      ],
+      "default": "cover"
+    },
+    { "type": "header", "content": "Prueba social" },
+    { "type": "checkbox", "id": "mostrar_prueba_social", "label": "Mostrar fila de prueba social", "default": true },
+    { "type": "image_picker", "id": "avatar_1", "label": "Foto de cliente 1" },
+    { "type": "image_picker", "id": "avatar_2", "label": "Foto de cliente 2" },
+    { "type": "image_picker", "id": "avatar_3", "label": "Foto de cliente 3" },
+    { "type": "checkbox", "id": "mostrar_verificado", "label": "Mostrar sello azul de verificado", "default": true },
+    { "type": "text", "id": "texto_prueba_social", "label": "Texto", "info": "Si ponés un número, que sea real.", "default": "Familias de todo el país ya lo usan" },
+    { "type": "header", "content": "Calificación" },
+    { "type": "checkbox", "id": "mostrar_rating", "label": "Mostrar estrellas", "default": true },
+    {
+      "type": "select",
+      "id": "fuente_rating",
+      "label": "De dónde salen los datos",
+      "options": [
+        { "value": "app", "label": "App de reseñas (automático)" },
+        { "value": "manual", "label": "Manual" }
+      ],
+      "default": "app",
+      "info": "Automático lee la calificación real que carga tu app de reseñas (Judge.me, Loox, etc.). Si no hay datos, usa los manuales."
+    },
+    { "type": "text", "id": "rating_numero", "label": "Calificación manual", "info": "Ej: 4.9/5. Solo con reseñas reales." },
+    { "type": "text", "id": "rating_cantidad", "label": "Cantidad de reseñas manual", "info": "Solo el número. Ej: 127" },
+    { "type": "text", "id": "texto_resenas", "label": "Texto de reseñas", "info": "[n] = cantidad", "default": "([n] reseñas)" },
+    { "type": "text", "id": "link_resenas", "label": "Ancla a las reseñas", "default": "#resenas" },
+    { "type": "header", "content": "Encabezado" },
+    { "type": "text", "id": "etiqueta_principal", "label": "Etiqueta destacada" },
+    { "type": "text", "id": "etiqueta_secundaria", "label": "Etiqueta secundaria" },
+    { "type": "text", "id": "titulo", "label": "Título", "info": "Si lo dejás vacío se usa el nombre del producto.", "default": "Velora - Kit antimoho para el baño" },
+    { "type": "textarea", "id": "subtitulo", "label": "Subtítulo" },
+    {
+      "type": "select",
+      "id": "tipografia_titulos",
+      "label": "Tipografía del título y beneficios",
+      "options": [
+        { "value": "poppins", "label": "Poppins bold" },
+        { "value": "arimo", "label": "Arimo (estilo Arial)" }
+      ],
+      "default": "poppins"
+    },
+    { "type": "checkbox", "id": "checks_con_lineas", "label": "Beneficios con líneas divisorias", "default": true },
+    { "type": "range", "id": "tamano_titulo_mobile", "label": "Tamaño del título mobile", "min": 20, "max": 40, "step": 1, "unit": "px", "default": 26 },
+    { "type": "range", "id": "tamano_titulo_desktop", "label": "Tamaño del título desktop", "min": 24, "max": 56, "step": 1, "unit": "px", "default": 32 },
+    { "type": "header", "content": "VELORA CYBER" },
+    { "type": "paragraph", "content": "Página igual que siempre + acentos Cyber: insignia en la 1ra foto, caja de beneficio, % en cada pack y tarjeta con reloj. Antes del día 1 corre el Pre-Cyber con los % del Cyber ocultos (??). El día 1 a las 00:00 cambia solo. [pre] = % Pre-Cyber, [p] = % de hoy, [n] = % de mañana." },
+    { "type": "checkbox", "id": "cyber_activo", "label": "Activar VELORA CYBER", "default": true },
+    { "type": "checkbox", "id": "cyber_insignia", "label": "Insignia en la primera foto", "default": true },
+    { "type": "select", "id": "cyber_insignia_estilo", "label": "Insignia de la foto · estilo", "options": [ { "value": "pildora", "label": "Píldora sutil" }, { "value": "logo", "label": "Logo Velora Cyber" } ], "default": "pildora" },
+    { "type": "image_picker", "id": "cyber_logo", "label": "Logo Velora Cyber", "info": "Vacío = usa el logo ya subido (link de abajo)." },
+    { "type": "text", "id": "cyber_logo_url", "label": "Link del logo", "default": "https://cdn.shopify.com/s/files/1/1018/9478/3252/files/velora-cyber-logo.png?v=1793451460" },
+    { "type": "text", "id": "cyber_ins_pack3", "label": "Insignia del pack 3 durante el Cyber", "info": "Vacío = usa la del pack.", "default": "⭐ Más elegido" },
+    { "type": "text", "id": "cyber_ins_pack4", "label": "Insignia del pack 4 durante el Cyber", "info": "Vacío = usa la del pack.", "default": "💰 Mayor ahorro" },
+    { "type": "checkbox", "id": "cyber_mostrar_reloj", "label": "Tarjeta con cuenta regresiva", "default": true },
+    { "type": "text", "id": "cyber_fecha_inicio", "label": "Fecha del día 1 (AAAA-MM-DD, hora Argentina)", "default": "2026-11-02" },
+    { "type": "range", "id": "cyber_p1", "label": "Descuento día 1", "min": 0, "max": 50, "step": 1, "unit": "%", "default": 30 },
+    { "type": "text", "id": "cyber_e1", "label": "Etiqueta día 1", "default": "LUN 2/11" },
+    { "type": "range", "id": "cyber_p2", "label": "Descuento día 2", "min": 0, "max": 50, "step": 1, "unit": "%", "default": 20 },
+    { "type": "text", "id": "cyber_e2", "label": "Etiqueta día 2", "default": "MAR 3/11" },
+    { "type": "range", "id": "cyber_p3", "label": "Descuento día 3", "min": 0, "max": 50, "step": 1, "unit": "%", "default": 15 },
+    { "type": "text", "id": "cyber_e3", "label": "Etiqueta día 3", "default": "MIÉ 4/11" },
+    { "type": "range", "id": "cyber_p4", "label": "Descuento día 4", "min": 0, "max": 50, "step": 1, "unit": "%", "default": 10 },
+    { "type": "text", "id": "cyber_e4", "label": "Etiqueta día 4", "default": "JUE 5/11" },
+    { "type": "checkbox", "id": "cyber_mostrar_vivo", "label": "Píldora \"En vivo\" arriba de todo", "default": true },
+    { "type": "text", "id": "cyber_vivo_texto", "label": "Texto de la píldora", "info": "[d] = día de hoy, [t] = total de días.", "default": "En vivo · Día [d] de [t]" },
+    { "type": "checkbox", "id": "cyber_mostrar_dias", "label": "Los 4 días con su % (los pasados se tachan)", "default": true },
+    { "type": "checkbox", "id": "pre_activo", "label": "Activar Pre-Cyber (antes del día 1)", "default": true },
+    { "type": "range", "id": "pre_porcentaje", "label": "Descuento Pre-Cyber", "min": 0, "max": 20, "step": 1, "unit": "%", "default": 5, "info": "Tiene que coincidir con el descuento automático de Shopify." },
+    { "type": "text", "id": "cyber_benef_titulo", "label": "Caja de beneficio · título chico", "default": "Tu beneficio Velora Cyber" },
+    { "type": "text", "id": "cyber_benef_pre", "label": "Caja · Pre-Cyber", "default": "[pre]% OFF ya aplicado" },
+    { "type": "text", "id": "cyber_benef_pre_bajada", "label": "Caja · Pre-Cyber (línea chica)", "default": "En todos los packs · sin código" },
+    { "type": "text", "id": "cyber_benef_vivo", "label": "Caja · durante el Cyber", "default": "Hoy [p]% OFF en todos los packs" },
+    { "type": "text", "id": "cyber_benef_manana", "label": "Caja · aviso de mañana", "default": "Mañana baja a [n]%" },
+    { "type": "text", "id": "cyber_benef_ultimo", "label": "Caja · último día", "default": "Último día · termina hoy 23:59" },
+    { "type": "text", "id": "cyber_pill_pre", "label": "Etiqueta del pack · Pre-Cyber", "default": "-[pre]%" },
+    { "type": "text", "id": "cyber_pill_vivo", "label": "Etiqueta del pack · Cyber", "default": "-[p]% CYBER" },
+    { "type": "text", "id": "cyber_reloj_pre", "label": "Tarjeta · Pre-Cyber", "default": "Los precios del Cyber se revelan en" },
+    { "type": "text", "id": "cyber_reloj_pre_pie", "label": "Tarjeta · Pre-Cyber (pie)", "default": "Lo que viene es más grande · ??% OFF" },
+    { "type": "text", "id": "cyber_reloj_vivo", "label": "Tarjeta · durante el Cyber", "default": "El [p]% de hoy termina en" },
+    { "type": "text", "id": "cyber_ahorro_texto", "label": "Tarjeta · ahorro del día", "info": "Muestra lo que ahorra hoy el pack elegido contra su precio tachado (el de la variante en Shopify), y el tachado al lado. [p] = % de hoy.", "default": "Con este pack hoy ahorrás" },
+    { "type": "color", "id": "cyber_color_1", "label": "Color Cyber 1 (violeta)", "default": "#3B2BD9" },
+    { "type": "color", "id": "cyber_color_2", "label": "Color Cyber 2 (morado)", "default": "#8A2BE2" },
+    { "type": "color", "id": "cyber_color_3", "label": "Color Cyber 3 (rosa)", "default": "#C2309A" },
+    { "type": "header", "content": "Cuotas sin interés (desactivadas)" },
+    { "type": "paragraph", "content": "Las cuotas están sacadas de esta página: estas opciones ya no se muestran. También se ocultan solas las insignias y datos que digan \"cuotas\"." },
+    { "type": "checkbox", "id": "cuotas_activo", "label": "Mostrar cuotas sin interés", "default": true },
+    { "type": "text", "id": "cuotas_titulo", "label": "Título de la banda", "default": "Cuotas sin interés" },
+    { "type": "text", "id": "cuotas_bajada", "label": "Texto de la banda", "default": "con Mercado Pago en packs de 3 y 5" },
+    { "type": "text", "id": "cuotas_etiqueta", "label": "Etiqueta roja", "default": "Hasta el viernes" },
+    { "type": "text", "id": "cuotas_fin", "label": "Último día de la promo (AAAA-MM-DD)", "info": "Termina ese día a las 23:59 hora Argentina y después se oculta sola. Vacío = no se oculta.", "default": "2026-10-30" },
+    { "type": "checkbox", "id": "cuotas_reloj", "label": "Mostrar cuenta regresiva", "default": true },
+    { "type": "text", "id": "cuotas_texto_pack", "label": "Texto de la cuota", "info": "[n] = cantidad de cuotas, [monto] = valor de cada cuota.", "default": "[n] cuotas sin interés de [monto]" },
+    { "type": "text", "id": "cuotas_sufijo", "label": "Texto después de la cuota (bajo el botón)", "default": "con Mercado Pago" },
+    { "type": "color", "id": "color_cuotas", "label": "Color de las cuotas", "default": "#1FA463" },
+    { "type": "paragraph", "content": "La cantidad de cuotas se elige en cada pack. En 0 ese pack no muestra cuotas." },
+    { "type": "header", "content": "Packs" },
+    { "type": "text", "id": "texto_separador", "label": "Texto sobre los packs", "default": "Comprá un pack y ahorrá" },
+    { "type": "inline_richtext", "id": "nota_packs", "label": "Nota bajo el título de packs", "default": "¿Juntas o silicona negras? Elegí el <strong>Kit</strong>: el gel es el que se queda en la junta." },
+    { "type": "checkbox", "id": "mostrar_circulo", "label": "Mostrar círculo de selección", "default": false },
+    { "type": "range", "id": "tamano_imagen_pack", "label": "Tamaño de la imagen del pack", "min": 32, "max": 72, "step": 2, "unit": "px", "default": 48 },
+    { "type": "checkbox", "id": "sin_decimales", "label": "Precios sin decimales", "default": false },
+    { "type": "checkbox", "id": "mostrar_tachado", "label": "Mostrar precio comparativo", "info": "Usa el precio tachado de cada pack. Si está vacío, usa el precio de comparación de Shopify.", "default": true },
+    { "type": "checkbox", "id": "mostrar_precio_unidad", "label": "Mostrar precio por unidad", "default": true },
+    { "type": "text", "id": "texto_precio_unidad", "label": "Texto del precio por unidad", "info": "[precio] = valor por unidad", "default": "Pagás [precio] c/u" },
+    { "type": "text", "id": "texto_incluye", "label": "Título de lo que incluye el pack elegido", "default": "Qué te llega" },
+    { "type": "header", "content": "Botón" },
+    { "type": "text", "id": "texto_boton", "label": "Texto del botón", "default": "Comprar ahora" },
+    { "type": "text", "id": "texto_agotado", "label": "Texto sin stock", "default": "Sin stock" },
+    { "type": "checkbox", "id": "mostrar_icono_carrito", "label": "Ícono de carrito", "default": true },
+    { "type": "checkbox", "id": "mostrar_flecha", "label": "Flecha a la derecha", "default": true },
+    { "type": "checkbox", "id": "mostrar_precio_boton", "label": "Mostrar precio en el botón", "default": false },
+    { "type": "range", "id": "radio_boton", "label": "Redondeo del botón", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 14 },
+    {
+      "type": "select",
+      "id": "modo_boton",
+      "label": "Al tocar el botón",
+      "options": [
+        { "value": "carrito", "label": "Abrir el carrito" },
+        { "value": "checkout", "label": "Ir directo a pagar" }
+      ],
+      "default": "carrito"
+    },
+    { "type": "inline_richtext", "id": "texto_garantia", "label": "Texto de garantía bajo el botón", "default": "<strong>Sin riesgo: probalo 30 días.</strong> Si no ves el cambio en tu baño, te devolvemos la plata." },
+    { "type": "text", "id": "texto_error", "label": "Mensaje de error", "default": "No pudimos agregarlo. Probá de nuevo o escribinos por WhatsApp." },
+    { "type": "header", "content": "Ahorro del pedido" },
+    { "type": "checkbox", "id": "mostrar_ahorro", "label": "Mostrar cuánto ahorra", "info": "Aparece arriba del botón y cambia según el pack elegido. Se oculta en packs sin ahorro.", "default": true },
+    { "type": "text", "id": "texto_ahorro", "label": "Texto", "info": "[monto] = lo que ahorra, en negrita.", "default": "Estás ahorrando [monto] en este pedido" },
+    { "type": "color", "id": "color_ahorro", "label": "Color", "default": "#1FA463" },
+    { "type": "header", "content": "Stock de la primera tanda" },
+    { "type": "checkbox", "id": "mostrar_tanda", "label": "Mostrar aviso de stock", "default": true },
+    { "type": "range", "id": "tanda_porcentaje", "label": "Porcentaje que queda", "info": "Actualizalo a mano según tu stock real.", "min": 1, "max": 100, "step": 1, "unit": "%", "default": 17 },
+    { "type": "text", "id": "texto_tanda", "label": "Texto", "info": "[porcentaje] = el número de arriba, en negrita.", "default": "Ya queda [porcentaje] de la primera tanda" },
+    { "type": "checkbox", "id": "mostrar_barra_tanda", "label": "Mostrar barrita de stock", "default": true },
+    {
+      "type": "select",
+      "id": "alineacion_tanda",
+      "label": "Alineación",
+      "options": [
+        { "value": "centro", "label": "Centrado" },
+        { "value": "izquierda", "label": "Izquierda" }
+      ],
+      "default": "centro"
+    },
+    { "type": "color", "id": "color_tanda", "label": "Color del aviso", "default": "#1FA463" },
+    { "type": "header", "content": "Medios de pago" },
+    { "type": "checkbox", "id": "mostrar_pagos", "label": "Mostrar tarjetas y medios de pago", "default": true },
+    {
+      "type": "select",
+      "id": "fuente_pagos",
+      "label": "Qué medios mostrar",
+      "options": [
+        { "value": "lista", "label": "Lista elegida" },
+        { "value": "automatico", "label": "Los activos en Shopify" }
+      ],
+      "default": "lista"
+    },
+    { "type": "text", "id": "lista_pagos", "label": "Lista de medios", "info": "Separados por coma: american_express, apple_pay, google_pay, master, maestro, paypal, visa", "default": "american_express,apple_pay,master,paypal,visa" },
+    { "type": "image_picker", "id": "logo_pago_extra_1", "label": "Logo extra 1 (ej: Mercado Pago)" },
+    { "type": "image_picker", "id": "logo_pago_extra_2", "label": "Logo extra 2" },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_fondo", "label": "Fondo", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_tinta", "label": "Tinta (textos)", "default": "#121A21" },
+    { "type": "color", "id": "color_azul", "label": "Azul Velora (acento)", "default": "#1E5BD6" },
+    { "type": "color", "id": "color_celeste", "label": "Celeste (degradado de los íconos)", "default": "#3FA9F5" },
+    { "type": "color", "id": "color_niebla", "label": "Niebla (paneles)", "default": "#EEF3FA" },
+    { "type": "color", "id": "color_piedra", "label": "Piedra (texto secundario)", "default": "#66717D" },
+    { "type": "color", "id": "color_linea", "label": "Línea (bordes)", "default": "#DCE3EC" },
+    { "type": "color", "id": "color_estrellas", "label": "Estrellas", "default": "#F5A623" },
+    { "type": "color", "id": "color_boton_fondo", "label": "Botón · fondo", "default": "#1E5BD6" },
+    { "type": "color", "id": "color_boton_texto", "label": "Botón · texto", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_pack_fondo", "label": "Pack · fondo", "default": "#F4F6F9" },
+    { "type": "color", "id": "color_pack_activo_fondo", "label": "Pack elegido · fondo", "default": "#DCE7FA" },
+    { "type": "color", "id": "color_pack_activo_borde", "label": "Pack elegido · borde", "default": "#1E5BD6" },
+    { "type": "range", "id": "radio_pack", "label": "Redondeo de los packs", "min": 6, "max": 40, "step": 1, "unit": "px", "default": 22 },
+    { "type": "color", "id": "color_chip_fondo", "label": "Etiqueta del pack · fondo", "default": "#9CC0F5" },
+    { "type": "color", "id": "color_chip_texto", "label": "Etiqueta del pack · texto", "default": "#121A21" },
+    { "type": "color", "id": "color_precio_unidad", "label": "Precio por unidad", "default": "#1E3A9E" },
+    { "type": "color", "id": "color_regalo_activo", "label": "Franja de regalo · elegida", "default": "#121A21" },
+    { "type": "color", "id": "color_regalo_inactivo", "label": "Franja de regalo · sin elegir", "default": "#9AA8B8" },
+    { "type": "color", "id": "color_insignia_fondo", "label": "Insignia · fondo", "default": "#1E5BD6" },
+    { "type": "color", "id": "color_insignia_texto", "label": "Insignia · texto", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_tachado", "label": "Precio tachado", "default": "#E53935" },
+    { "type": "header", "content": "Espaciado" },
+    { "type": "range", "id": "ancho_maximo", "label": "Ancho máximo", "min": 900, "max": 1600, "step": 20, "unit": "px", "default": 1240 },
+    { "type": "range", "id": "padding_superior_mobile", "label": "Padding superior mobile", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_inferior_mobile", "label": "Padding inferior mobile", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_superior_desktop", "label": "Padding superior desktop", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40 },
+    { "type": "range", "id": "padding_inferior_desktop", "label": "Padding inferior desktop", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 },
+    { "type": "header", "content": "Animación y visibilidad" },
+    { "type": "checkbox", "id": "animaciones", "label": "Animaciones de entrada y brillo del botón", "default": true },
+    { "type": "checkbox", "id": "ocultar_mobile", "label": "Ocultar en mobile", "default": false },
+    { "type": "checkbox", "id": "ocultar_desktop", "label": "Ocultar en desktop", "default": false },
+    { "type": "header", "content": "Reseñas debajo de las preguntas" },
+    { "type": "paragraph", "content": "Agregá bloques \"Reseña de cliente\". Si hay más de una, van cambiando solas y se pueden deslizar con el dedo." },
+    { "type": "range", "id": "resenas_intervalo", "label": "Cambiar cada", "min": 3, "max": 12, "step": 1, "unit": "s", "default": 6 }
+  ],
+  "blocks": [
+    {
+      "type": "check",
+      "name": "Beneficio",
+      "settings": [
+        { "type": "text", "id": "texto", "label": "Texto", "default": "Saca el negro de las juntas sin fregar" },
+        {
+          "type": "select",
+          "id": "icono",
+          "label": "Ícono",
+          "info": "Automático elige el ícono según lo que dice el texto.",
+          "options": [
+            { "value": "auto", "label": "Automático" },
+            { "value": "mancha", "label": "Manchas que desaparecen" },
+            { "value": "reloj", "label": "Reloj (actúa solo)" },
+            { "value": "azulejo", "label": "Azulejos" },
+            { "value": "brillo", "label": "Brillo (limpio)" },
+            { "value": "gota", "label": "Gota de gel" },
+            { "value": "spray", "label": "Spray" },
+            { "value": "escudo", "label": "Escudo" },
+            { "value": "check", "label": "Check" }
+          ],
+          "default": "auto"
+        }
+      ]
+    },
+    {
+      "type": "pack",
+      "name": "Pack",
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Nombre del pack", "default": "Kit Baño" },
+        { "type": "text", "id": "chip", "label": "Etiqueta del pack", "default": "Paredes y juntas" },
+        { "type": "text", "id": "bajada", "label": "Bajada (opcional)" },
+        { "type": "image_picker", "id": "imagen", "label": "Imagen del producto" },
+        { "type": "checkbox", "id": "repetir_imagen", "label": "Repetir la imagen según las unidades", "info": "Ej: en 2 Sprays se ven 2 frascos.", "default": true },
+        { "type": "header", "content": "Variante vinculada" },
+        { "type": "paragraph", "content": "El precio sale de la variante de Shopify. En el editor, arriba de los packs, ves la lista de variantes que lee la sección." },
+        { "type": "range", "id": "variante", "label": "Posición de la variante", "info": "0 = automático: el 1er pack toma la 1ra variante, el 2do la 2da, y así. Se usa si no escribís el nombre.", "min": 0, "max": 20, "step": 1, "default": 0 },
+        { "type": "text", "id": "nombre_variante", "label": "Nombre de la variante (opcional)", "info": "No importan mayúsculas, tildes ni espacios. Ej: Paga 1 lleva 2" },
+        { "type": "product", "id": "producto_oferta", "label": "Producto de la oferta (opcional)", "info": "Solo si esta oferta está creada como un producto aparte." },
+        { "type": "range", "id": "cantidad", "label": "Cantidad que se agrega", "info": "Dejalo en 1 si la variante ya es la oferta completa.", "min": 1, "max": 6, "step": 1, "default": 1 },
+        { "type": "range", "id": "unidades", "label": "Unidades del pack (para precio c/u e imágenes)", "min": 1, "max": 6, "step": 1, "default": 1 },
+        { "type": "header", "content": "Precios que se muestran" },
+        { "type": "number", "id": "precio_tachado", "label": "Precio tachado", "info": "Sin puntos. Ej: 99980. Vacío = usa el precio de comparación de Shopify." },
+        { "type": "number", "id": "precio_unidad", "label": "Precio por unidad", "info": "Sin puntos. Ej: 24995. Vacío = se calcula solo." },
+        { "type": "number", "id": "ahorro_manual", "label": "Ahorro a mostrar (opcional)", "info": "Sin puntos. Vacío = precio tachado menos precio del pack." },
+        { "type": "text", "id": "insignia", "label": "Insignia", "info": "Ej: Más elegido" },
+        { "type": "checkbox", "id": "por_defecto", "label": "Elegido por defecto", "default": false },
+        { "type": "checkbox", "id": "excluir_cyber", "label": "Excluir del descuento Cyber / Pre-Cyber", "default": false },
+        { "type": "range", "id": "cuotas", "label": "Cuotas sin interés de este pack", "info": "0 = sin cuotas. Se prende/apaga todo en \"Cuotas sin interés\" de la sección.", "min": 0, "max": 12, "step": 1, "default": 0 },
+        { "type": "textarea", "id": "incluye", "label": "Qué incluye (se despliega al elegirlo)", "info": "Un ítem por línea." },
+        { "type": "header", "content": "Regalo que se suma al carrito" },
+        { "type": "product", "id": "regalo_producto", "label": "Producto de regalo (ej: e-book)", "info": "Se agrega solo al carrito junto con este pack. Para que salga gratis, creá un descuento automático en Shopify (ver instrucciones)." },
+        { "type": "header", "content": "Franja de regalo" },
+        { "type": "text", "id": "regalo_texto", "label": "Texto del regalo", "info": "Dejalo vacío para no mostrar la franja." },
+        { "type": "image_picker", "id": "regalo_imagen", "label": "Imagen del regalo" },
+        { "type": "text", "id": "regalo_valor", "label": "Valor del regalo (tachado)" }
+      ]
+    },
+    {
+      "type": "dato_rapido",
+      "name": "Dato rápido",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icono",
+          "label": "Ícono",
+          "options": [
+            { "value": "envio", "label": "Envío" },
+            { "value": "reloj", "label": "Reloj" },
+            { "value": "seguro", "label": "Pago seguro" },
+            { "value": "cuotas", "label": "Cuotas" },
+            { "value": "whatsapp", "label": "WhatsApp" }
+          ],
+          "default": "envio"
+        },
+        { "type": "text", "id": "texto", "label": "Texto", "default": "Envío gratis a todo el país" }
+      ]
+    },
+    {
+      "type": "acordeon",
+      "name": "Pregunta (acordeón)",
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Pregunta", "default": "¿Cómo se usa?" },
+        { "type": "richtext", "id": "contenido", "label": "Respuesta", "default": "<p>Con ventana abierta y guantes: aplicás, dejás actuar y pasás un paño húmedo.</p>" },
+        {
+          "type": "select",
+          "id": "ubicacion",
+          "label": "Ubicación",
+          "options": [
+            { "value": "arriba", "label": "Arriba de los packs" },
+            { "value": "abajo", "label": "Al final" }
+          ],
+          "default": "abajo"
+        },
+        { "type": "checkbox", "id": "abierto", "label": "Abierta por defecto", "default": false }
+      ]
+    },
+    {
+      "type": "confianza",
+      "name": "Sello de confianza",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icono",
+          "label": "Ícono",
+          "options": [
+            { "value": "garantia", "label": "Garantía" },
+            { "value": "seguro", "label": "Compra segura" },
+            { "value": "envio", "label": "Envío" },
+            { "value": "cuotas", "label": "Cuotas" },
+            { "value": "whatsapp", "label": "WhatsApp" },
+            { "value": "argentina", "label": "Hecho en Argentina" },
+            { "value": "reloj", "label": "Reloj" }
+          ],
+          "default": "garantia"
+        },
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Garantía 30 días" },
+        { "type": "text", "id": "bajada", "label": "Bajada", "default": "Probalo tranquilo" }
+      ]
+    },
+    {
+      "type": "resena",
+      "name": "Reseña de cliente",
+      "limit": 8,
+      "settings": [
+        { "type": "paragraph", "content": "Usá reseñas reales y pedí permiso para mostrar la foto y el nombre." },
+        { "type": "image_picker", "id": "foto", "label": "Foto", "info": "Cuadrada. Si no hay, se muestra la inicial." },
+        { "type": "text", "id": "etiqueta", "label": "Etiqueta", "default": "Cliente verificado" },
+        { "type": "range", "id": "estrellas", "label": "Estrellas", "min": 0, "max": 5, "step": 1, "info": "0 = ocultar.", "default": 5 },
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Título de la reseña" },
+        { "type": "textarea", "id": "texto", "label": "Reseña", "default": "Acá va lo que te escribió tu cliente, con sus palabras." },
+        { "type": "text", "id": "nombre", "label": "Nombre", "default": "Nombre del cliente" },
+        { "type": "text", "id": "detalle", "label": "Detalle", "info": "Ciudad o qué compró.", "default": "Compró: Pagá 2 llevá 3" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Velora · Producto",
+      "blocks": [
+        {
+          "type": "check",
+          "settings": {
+            "texto": "Saca el negro de juntas y silicona"
+          }
+        },
+        {
+          "type": "check",
+          "settings": {
+            "texto": "Sin fregar: aplicás, esperás y pasás un paño"
+          }
+        },
+        {
+          "type": "check",
+          "settings": {
+            "texto": "El gel no chorrea, se queda en la junta"
+          }
+        },
+        {
+          "type": "check",
+          "settings": {
+            "texto": "Para paredes, techos, azulejos y ventanas"
+          }
+        },
+        {
+          "type": "acordeon",
+          "settings": {
+            "titulo": "¿Y si ya probé con lavandina y volvió?",
+            "contenido": "<p>Pasa mucho: la lavandina es líquida y se escurre de la junta antes de actuar. El gel Velora se queda donde está el moho toda la noche, y el spray trabaja 15 minutos sobre paredes y techos. Por eso no tenés que fregar.</p>",
+            "ubicacion": "arriba"
+          }
+        },
+        {
+          "type": "pack",
+          "settings": {
+            "titulo": "Llevá 1",
+            "chip": "Para probar",
+            "variante": 0,
+            "cantidad": 1,
+            "unidades": 1,
+            "repetir_imagen": true,
+            "incluye": "1 Spray Antimoho 500 ml\nEnvío gratis\nGarantía 30 días"
+          }
+        },
+        {
+          "type": "pack",
+          "settings": {
+            "titulo": "Pagá 1 llevá 2",
+            "chip": "2x1",
+            "variante": 0,
+            "cantidad": 1,
+            "unidades": 2,
+            "repetir_imagen": true,
+            "precio_tachado": 99980,
+            "precio_unidad": 24995,
+            "incluye": "2 Spray Antimoho 500 ml\nEnvío gratis\nGarantía 30 días"
+          }
+        },
+        {
+          "type": "pack",
+          "settings": {
+            "titulo": "Pagá 2 llevá 3",
+            "cuotas": 2,
+            "chip": "Baño completo",
+            "variante": 0,
+            "cantidad": 1,
+            "unidades": 3,
+            "repetir_imagen": true,
+            "precio_tachado": 149970,
+            "precio_unidad": 19996,
+            "insignia": "Más elegido",
+            "por_defecto": true,
+            "incluye": "3 Spray Antimoho 500 ml\nEnvío gratis\nGarantía 30 días"
+          }
+        },
+        {
+          "type": "pack",
+          "settings": {
+            "titulo": "Pagá 3 llevá 5",
+            "cuotas": 3,
+            "chip": "Mejor precio",
+            "variante": 0,
+            "cantidad": 1,
+            "unidades": 5,
+            "repetir_imagen": true,
+            "precio_tachado": 249950,
+            "precio_unidad": 15998,
+            "incluye": "5 Spray Antimoho 500 ml\nEnvío gratis\nGarantía 30 días"
+          }
+        },
+        {
+          "type": "dato_rapido",
+          "settings": {
+            "icono": "envio",
+            "texto": "Envío gratis a todo el país"
+          }
+        },
+        {
+          "type": "dato_rapido",
+          "settings": {
+            "icono": "reloj",
+            "texto": "1 a 3 días hábiles"
+          }
+        },
+        {
+          "type": "dato_rapido",
+          "settings": {
+            "icono": "seguro",
+            "texto": "Pago seguro"
+          }
+        },
+        {
+          "type": "acordeon",
+          "settings": {
+            "titulo": "¿En qué superficies se puede usar?",
+            "contenido": "<p>Juntas, silicona, azulejos, paredes y techos pintados, marcos de ventana y burletes. Si la superficie es delicada, probalo primero en una zona chica.</p>",
+            "ubicacion": "abajo"
+          }
+        },
+        {
+          "type": "acordeon",
+          "settings": {
+            "titulo": "¿Cómo se usa?",
+            "contenido": "<p>Con ventana abierta y guantes. Spray: rociás, esperás 15 minutos y pasás un paño húmedo. Gel: lo aplicás en la junta a la noche y a la mañana lo retirás con un paño.</p>",
+            "ubicacion": "abajo"
+          }
+        },
+        {
+          "type": "resena",
+          "settings": {}
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
